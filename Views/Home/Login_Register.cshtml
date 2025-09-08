@@ -1,0 +1,120 @@
+﻿@{
+    ViewData["Title"] = "Login / Register";
+}
+
+<div class="hero-section  text-center">
+    <h1 class="display-3 fw-bold">Time2Pay Portal</h1>
+    <p class="lead text-light">Login or Register to manage your monthly claims efficiently.</p>
+
+</div>
+
+
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="auth-card">
+                <!-- Tabs -->
+                <ul class="nav nav-tabs justify-content-center mb-4" id="authTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="login-tab" data-bs-toggle="tab" data-bs-target="#login" type="button" role="tab" aria-controls="login" aria-selected="true">
+                            Login
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="register-tab" data-bs-toggle="tab" data-bs-target="#register" type="button" role="tab" aria-controls="register" aria-selected="false">
+                            Register
+                        </button>
+                    </li>
+                </ul>
+
+                <!-- Tab Content -->
+                <div class="tab-content" id="authTabsContent">
+                    <!-- Login Form -->
+                    <div class="tab-pane fade show active" id="login" role="tabpanel" aria-labelledby="login-tab">
+                        <form>
+                            <div class="form-floating mb-3">
+                                <input type="email" class="form-control" id="loginEmail" placeholder="name@example.com">
+                                <label for="loginEmail">Email address</label>
+                            </div>
+
+                            <div class="form-floating mb-4">
+                                <input type="password" class="form-control" id="loginPassword" placeholder="Password">
+                                <label for="loginPassword">Password</label>
+                            </div>
+                            <a class="btn w-100 auth-btn" asp-area="" asp-controller="Dashboard" asp-action="Lecture">Login</a>
+
+                            
+                        </form>
+                    </div>
+
+                    <!-- Register Form -->
+                    <div class="tab-pane fade" id="register" role="tabpanel" aria-labelledby="register-tab">
+                        <form>
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" id="employeeName" placeholder="Full Name">
+                                <label for="employeeName">Full Name</label>
+                            </div>
+
+                            <div class="form-floating mb-3">
+                                <input type="email" class="form-control" id="employeeEmail" placeholder="Email">
+                                <label for="employeeEmail">Email</label>
+                            </div>
+
+                            <div class="form-floating mb-3">
+                                <select class="form-select" id="employeeDepartment" aria-label="Department">
+                                    <option value=""></option>
+                                    <option value="1">Computer Science</option>
+                                    <option value="2">Mathematics</option>
+                                    <option value="3">Physics</option>
+                                </select>
+                                <label for="employeeDepartment">Department</label>
+                            </div>
+
+                            
+
+                            <div class="form-floating mb-4">
+                                <select class="form-select" id="employeeRole" aria-label="Role">
+                                    <option value=""></option>
+                                    <option value="Lecturer">Lecturer</option>
+                                    <option value="Coordinator">Coordinator</option>
+                                    <option value="Manager">Manager</option>
+                                </select>
+                                <label for="employeeRole">Role</label>
+                            </div>
+
+                            <!-- OTP Notification and Send Button (hidden initially) -->
+                            <div id="otpNotifyContainer" style="display: none;" class="mb-4">
+                                <small class="text-info d-block mb-2">
+                                    Since you selected a privileged role, a One-Time Pin (OTP) will be sent to your department manager.
+                                    Please request it from them to complete registration.
+                                </small>
+                                <button type="button" class="btn w-100 auth-btn">Send OTP to Manager</button>
+                            </div>
+
+                            <!-- OTP Input (hidden initially) -->
+                            <div class="form-floating mb-4" id="otpContainer" style="display: none;">
+                                <input type="text" class="form-control" id="otpInput" placeholder="Enter OTP">
+                                <label for="otpInput">One-Time Pin</label>
+                            </div>
+
+                            <div class="form-floating mb-4">
+                                <input type="password" class="form-control" id="registerPassword" placeholder="Password">
+                                <label for="registerPassword">Password</label>
+                            </div>
+
+                            <div class="form-floating mb-4">
+                                <input type="password" class="form-control" id="registerConfirmPassword" placeholder="Confirm Password">
+                                <label for="registerConfirmPassword">Confirm Password</label>
+                            </div>
+
+                            <button type="submit" class="btn w-100 auth-btn">Register</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+    
+    

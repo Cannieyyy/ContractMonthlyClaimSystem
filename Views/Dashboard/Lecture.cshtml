@@ -1,0 +1,231 @@
+﻿@{
+    ViewData["Title"] = "Lecture Dashboard";
+
+}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<div class="container-fluid py-5">
+    <!-- Header -->
+    <div class="text-center mb-5">
+        <h1 class="hero-h1">Welcome back, Lecturer!</h1>
+        <p class="text-muted">Today is September 5, 2025 | Role: Lecturer</p>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="row g-4 mb-5 text-center">
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <i class="bi bi-clipboard-check display-6 text-info"></i>
+                    <h5 class="mt-3">Claims Submitted</h5>
+                    <h2 class="fw-bold">12</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <i class="bi bi-check-circle display-6 text-success"></i>
+                    <h5 class="mt-3">Approved</h5>
+                    <h2 class="fw-bold">8</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <i class="bi bi-hourglass-split display-6 text-warning"></i>
+                    <h5 class="mt-3">Pending</h5>
+                    <h2 class="fw-bold">3</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <i class="bi bi-x-circle display-6 text-danger"></i>
+                    <h5 class="mt-3">Rejected</h5>
+                    <h2 class="fw-bold">1</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Feature Cards -->
+    
+    <div class="row g-4 mb-5" id="featureCardsRow">
+        <!-- Submit Claim (clickable) -->
+        <div class="col-md-4">
+            <div id="submitClaimCard" class="card feature-card h-100 text-center clickable-card">
+                <div class="card-body d-flex flex-column justify-content-center">
+                    <i class="bi bi-file-earmark-text display-4 text-primary"></i>
+                    <h4 class="mt-3">Submit Claim</h4>
+                    <p class="text-muted">Easily create and submit a new monthly work claim.</p>
+                </div>
+            </div>
+        </div>
+        <!-- ===== hidden claim form (appears when Submit Claim card is clicked) ===== -->
+        <div class="row" id="claimFormSection" style="display: none;">
+            <div class="col-12">
+                <div class="card bg-dark text-light rounded-4">
+                    <div class="card-header">
+                        <h5 class="mb-0 text-info">Submit Claim</h5>
+                    </div>
+
+                    <div class="d-flex justify-content-center my-5">
+                        <div class="card bg-dark text-light shadow-sm" style="max-width: 500px; width: 100%;">
+                            <div class="card-body p-4">
+                                <h3 class="card-title text-center mb-4" style="color: #0dcaf0;">Submit Claim</h3>
+
+                                <form id="submitClaimForm">
+                                    <!-- Hours Worked -->
+                                    <div class="form-floating mb-3">
+                                        <input type="number" class="form-control bg-secondary text-light" id="hoursWorked" placeholder="Hours Worked" min="0">
+                                        <label for="hoursWorked">Hours Worked</label>
+                                    </div>
+
+                                    <!-- Month -->
+                                    <div class="form-floating mb-3">
+                                        <input type="month" class="form-control bg-secondary text-light" id="workMonth" placeholder="Month">
+                                        <label for="workMonth">Month</label>
+                                    </div>
+
+                                    <!-- File Upload -->
+                                    <div class="mb-3">
+                                        <label class="form-label">Supporting Document (PDF)</label>
+                                        <input class="form-control bg-secondary text-light" type="file" id="supportingDoc" accept=".pdf">
+                                    </div>
+
+                                    <!-- Submit / Cancel Buttons -->
+                                    <div class="d-flex justify-content-end mt-4">
+                                        <button type="submit" class="btn btn-info">Submit Claim</button>
+                                        <button type="button" class="btn btn-outline-light ms-2" id="cancelClaimBtn">Cancel</button>
+                                    </div>
+                                </form>
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- View Claims Card -->
+        <div class="col-md-4">
+            <div class="card feature-card h-100 text-center" id="viewClaimsCard">
+                <div class="card-body d-flex flex-column justify-content-center">
+                    <i class="bi bi-list-check display-4 text-primary"></i>
+                    <h4 class="mt-3">View Claims</h4>
+                    <p class="text-muted">Track the status of your submitted claims.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Claims Table (Initially Hidden) -->
+        <div class="card bg-dark text-light shadow-sm my-4" style="max-width: 900px; margin:auto; display:none;" id="viewClaimsContainer">
+            <div class="card-body">
+                <h4 class="card-title text-center mb-4" style="color: #0dcaf0;">My Submitted Claims</h4>
+
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover align-middle text-center">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Date</th>
+                                <th>Hours Worked</th>
+                                <th>Status</th>
+                                <th>Document</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Sample Static Data -->
+                            <tr>
+                                <td>1</td>
+                                <td>2025-08-15</td>
+                                <td>12</td>
+                                <td><span class="badge bg-warning">Pending</span></td>
+                                <td><a href="#" class="btn btn-sm btn-outline-info">View</a></td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td>2025-08-01</td>
+                                <td>18</td>
+                                <td><span class="badge bg-success">Approved</span></td>
+                                <td><a href="#" class="btn btn-sm btn-outline-info">View</a></td>
+                            </tr>
+                            <tr>
+                                <td>3</td>
+                                <td>2025-07-20</td>
+                                <td>10</td>
+                                <td><span class="badge bg-danger">Rejected</span></td>
+                                <td><a href="#" class="btn btn-sm btn-outline-info">View</a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Cancel Button -->
+                <div class="d-flex justify-content-end mt-3">
+                    <button type="button" class="btn btn-outline-light" id="cancelViewClaimsBtn">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analytics (normal card, can be a link) -->
+        <!-- Analytics Card -->
+        <div class="col-md-4">
+            <div class="card feature-card h-100 text-center" id="analyticsCard">
+                <div class="card-body">
+                    <i class="bi bi-bar-chart-line display-4 text-primary"></i>
+                    <h4 class="mt-3">Analytics</h4>
+                    <p class="text-muted">View quick reports of your monthly work.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart Container (Initially Hidden) -->
+        <div class="card bg-dark text-light shadow-sm my-4" style="max-width: 800px; margin:auto; display:none;" id="analyticsChartContainer">
+            <div class="card-body">
+                <h4 class="card-title text-center mb-4" style="color: #0dcaf0;">Quick Reports</h4>
+                <canvas id="quickReportsChart" style="width:100%; height:300px;"></canvas>
+                <!-- Cancel Button -->
+                <div class="d-flex justify-content-end mt-3">
+                    <button type="button" class="btn btn-outline-light" id="cancelAnalyticsBtn">Close</button>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+
+    
+        
+    <!-- Quick Links -->
+    <div class="row g-4 text-center">
+        <div class="col-md-4">
+            <div class="card quick-link-card">
+                <div class="card-body">
+                    <i class="bi bi-person-circle display-6 text-info"></i>
+                    <h5 class="mt-2">Profile Settings</h5>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card quick-link-card">
+                <div class="card-body">
+                    <i class="bi bi-question-circle display-6 text-info"></i>
+                    <h5 class="mt-2">Help Center</h5>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card quick-link-card">
+                <div class="card-body">
+                    <i class="bi bi-box-arrow-right display-6 text-danger"></i>
+                    <h5 class="mt-2">Log Out</h5>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

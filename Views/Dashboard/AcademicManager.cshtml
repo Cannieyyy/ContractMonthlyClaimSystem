@@ -1,0 +1,85 @@
+﻿@{
+    ViewData["Title"] = "Manager Dashboard";
+}
+
+<div class="container-fluid py-4">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="text-info fw-bold">Manager Dashboard</h1>
+        <div>
+            <a href="#" class="btn btn-outline-light">Profile</a>
+            <a href="#" class="btn btn-outline-danger">Logout</a>
+        </div>
+    </div>
+
+    <!-- Stats Section -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card feature-card text-center p-3">
+                <i class="bi bi-check2-square display-5 feature-icon"></i>
+                <h5 class="card-title mt-3">Claims to Approve</h5>
+                <p class="card-text">15 Pending</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card feature-card text-center p-3">
+                <i class="bi bi-people display-5 feature-icon"></i>
+                <h5 class="card-title mt-3">Coordinators</h5>
+                <p class="card-text">4 Active</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card feature-card text-center p-3">
+                <i class="bi bi-bar-chart-line display-5 feature-icon"></i>
+                <h5 class="card-title mt-3">Reports</h5>
+                <p class="card-text">Monthly & Yearly</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card feature-card text-center p-3">
+                <i class="bi bi-exclamation-triangle display-5 feature-icon"></i>
+                <h5 class="card-title mt-3">Issues</h5>
+                <p class="card-text">2 Claims</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity Section -->
+    <div class="card bg-dark text-light mb-4">
+        <div class="card-header border-bottom border-secondary">
+            <h5 class="mb-0">Recent Approvals</h5>
+        </div>
+        <div class="card-body">
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item bg-dark text-light">Claim #102 approved - Lecturer A</li>
+                <li class="list-group-item bg-dark text-light">Claim #103 flagged for correction - Coordinator B</li>
+                <li class="list-group-item bg-dark text-light">Claim #104 approved - Lecturer C</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Shortcuts Section -->
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card feature-card text-center p-4">
+                <i class="bi bi-folder-check display-5 feature-icon"></i>
+                <h5 class="card-title mt-3">Approve Claims</h5>
+                <p class="card-text">Verify and approve claims submitted by coordinators.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card feature-card text-center p-4">
+                <i class="bi bi-people display-5 feature-icon"></i>
+                <h5 class="card-title mt-3">Manage Coordinators</h5>
+                <p class="card-text">Add/remove coordinators per department.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card feature-card text-center p-4">
+                <i class="bi bi-bar-chart display-5 feature-icon"></i>
+                <h5 class="card-title mt-3">Generate Reports</h5>
+                <p class="card-text">Export and analyze claims data.</p>
+            </div>
+        </div>
+    </div>
+</div>

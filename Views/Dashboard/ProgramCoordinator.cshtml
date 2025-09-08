@@ -1,0 +1,315 @@
+﻿@{
+    ViewData["Title"] = "Coordinator Dashboard";
+}
+
+<div class="container-fluid py-4">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="text-info fw-bold">Coordinator Dashboard</h1>
+        <div>
+            <a href="#" class="btn btn-outline-light">Profile</a>
+            <a href="#" class="btn btn-outline-danger">Logout</a>
+        </div>
+    </div>
+
+    <!-- Stats Section -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card feature-card text-center p-3">
+                <i class="bi bi-person-check display-5 feature-icon"></i>
+                <h5 class="card-title mt-3">Claims to Verify</h5>
+                <p class="card-text">12 Pending</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card feature-card text-center p-3">
+                <i class="bi bi-clock-history display-5 feature-icon"></i>
+                <h5 class="card-title mt-3">In Progress</h5>
+                <p class="card-text">8 Claims</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card feature-card text-center p-3">
+                <i class="bi bi-check2-square display-5 feature-icon"></i>
+                <h5 class="card-title mt-3">Verified</h5>
+                <p class="card-text">25 Claims</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card feature-card text-center p-3">
+                <i class="bi bi-exclamation-triangle display-5 feature-icon"></i>
+                <h5 class="card-title mt-3">Issues</h5>
+                <p class="card-text">3 Claims</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity Section -->
+    <div class="card bg-dark text-light mb-4">
+        <div class="card-header border-bottom border-secondary">
+            <h5 class="mb-0">Recent Verifications</h5>
+        </div>
+        <div class="card-body">
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item bg-dark text-light">Claim #102 verified - Lecturer A</li>
+                <li class="list-group-item bg-dark text-light">Claim #103 flagged for correction - Lecturer B</li>
+                <li class="list-group-item bg-dark text-light">Claim #104 verified - Lecturer C</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Shortcuts Section -->
+    <div class="row g-4">
+        <!-- Verify Claims Card -->
+        <div class="col-md-4">
+            <div class="card feature-card text-center p-4 verify-claims-card" style="cursor: pointer;">
+                <i class="bi bi-check-circle display-5 feature-icon"></i>
+                <h5 class="card-title mt-3">Verify Claims</h5>
+                <p class="card-text">Review and verify lecturer claim submissions.</p>
+            </div>
+        </div>
+        
+
+        <!-- Verify Claims Section (Hidden by default) -->
+        <div id="verifyClaimsSection" class="mt-4" style="display: none;">
+            <div class="card bg-dark text-light">
+                <div class="card-body">
+                    <h4 class="mb-4 text-info">Pending Claims for Verification</h4>
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Claim ID</th>
+                                    <th>Lecturer</th>
+                                    <th>Hours Worked</th>
+                                    <th>Date Submitted</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Sample Data -->
+                                <tr>
+                                    <td>CLM001</td>
+                                    <td>John Doe</td>
+                                    <td>20</td>
+                                    <td>2025-09-01</td>
+                                    <td><span class="badge bg-warning">Pending</span></td>
+                                    <td>
+                                        <button class="btn btn-success btn-sm">Approve</button>
+                                        <button class="btn btn-danger btn-sm">Reject</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>CLM002</td>
+                                    <td>Jane Smith</td>
+                                    <td>15</td>
+                                    <td>2025-09-03</td>
+                                    <td><span class="badge bg-warning">Pending</span></td>
+                                    <td>
+                                        <button class="btn btn-success btn-sm">Approve</button>
+                                        <button class="btn btn-danger btn-sm">Reject</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Cancel Button -->
+                    <div class="text-end mt-3">
+                        <button id="closeVerifyClaims" class="btn btn-outline-light">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Manage Lecturers Card -->
+        <div class="col-md-4">
+            <div class="card feature-card text-center p-4 manage-lecturers-card" style="cursor: pointer;">
+                <i class="bi bi-people display-5 feature-icon"></i>
+                <h5 class="card-title mt-3">Manage Lecturers</h5>
+                <p class="card-text">Oversee lecturers in your department.</p>
+            </div>
+        </div>
+
+        <!-- Hidden Manage Lecturers Section -->
+        <div id="manageLecturersSection" class="mt-4" style="display: none;">
+            <div class="card bg-dark text-light">
+                <div class="card-body">
+                    <h4 class="mb-4 text-info">Lecturers in Your Department</h4>
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Department</th>
+                                    <th>Role</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Sample Data -->
+                                <tr>
+                                    <td>John Doe</td>
+                                    <td>jdoe@example.com</td>
+                                    <td>Computer Science</td>
+                                    <td>Lecturer</td>
+                                </tr>
+                                <tr>
+                                    <td>Jane Smith</td>
+                                    <td>jsmith@example.com</td>
+                                    <td>Mathematics</td>
+                                    <td>Lecturer</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Cancel Button -->
+                    <div class="text-end mt-3">
+                        <button id="closeManageLecturers" class="btn btn-outline-light">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reports Card -->
+        <div class="col-md-4">
+            <div class="card feature-card text-center p-4 reports-card">
+                <i class="bi bi-bar-chart display-5 feature-icon"></i>
+                <h5 class="card-title mt-3">Reports</h5>
+                <p class="card-text">Generate claim and verification reports.</p>
+            </div>
+        </div>
+
+        <!-- Reports Section (Hidden by default) -->
+        <div id="reportsSection" class="mt-4" style="display: none;">
+            <div class="card bg-dark text-light">
+                <div class="card-body">
+                    <h4 class="text-info mb-3">Claim & Verification Reports</h4>
+
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Report ID</th>
+                                    <th>Lecturer</th>
+                                    <th>Hours Worked</th>
+                                    <th>Date Submitted</th>
+                                    <th>Status</th>
+                                    <th>Verified By</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Sample Data -->
+                                <tr>
+                                    <td>RPT001</td>
+                                    <td>John Doe</td>
+                                    <td>20</td>
+                                    <td>2025-09-01</td>
+                                    <td><span class="badge bg-success">Verified</span></td>
+                                    <td>Coordinator A</td>
+                                </tr>
+                                <tr>
+                                    <td>RPT002</td>
+                                    <td>Jane Smith</td>
+                                    <td>15</td>
+                                    <td>2025-09-03</td>
+                                    <td><span class="badge bg-warning">Pending</span></td>
+                                    <td>---</td>
+                                </tr>
+                                <tr>
+                                    <td>RPT003</td>
+                                    <td>Michael Brown</td>
+                                    <td>18</td>
+                                    <td>2025-09-04</td>
+                                    <td><span class="badge bg-danger">Rejected</span></td>
+                                    <td>Coordinator B</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Cancel Button -->
+                    <div class="text-end mt-3">
+                        <button id="closeReports" class="btn btn-outline-light">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+   
+</div>
+
+<script>
+       document.addEventListener('DOMContentLoaded', function () {
+        const verifyCard = document.querySelector('.verify-claims-card');
+        const verifySection = document.getElementById('verifyClaimsSection');
+        const closeBtn = document.getElementById('closeVerifyClaims');
+
+        if (verifyCard && verifySection) {
+            verifyCard.addEventListener('click', function () {
+                verifySection.style.display = 'block';
+                verifySection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        }
+
+        if (closeBtn && verifySection) {
+            closeBtn.addEventListener('click', function () {
+                verifySection.style.display = 'none';
+                verifyCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            });
+        }
+    });
+
+        document.addEventListener('DOMContentLoaded', function () {
+        const manageCard = document.querySelector('.manage-lecturers-card');
+        const manageSection = document.getElementById('manageLecturersSection');
+        const closeManageBtn = document.getElementById('closeManageLecturers');
+
+        // Show section when card is clicked
+        if (manageCard) {
+            manageCard.addEventListener('click', function () {
+                const isVisible = window.getComputedStyle(manageSection).display !== 'none';
+                if (!isVisible) {
+                    manageSection.style.display = 'block';
+                    manageSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        }
+
+        // Hide section when cancel button is clicked
+        if (closeManageBtn) {
+            closeManageBtn.addEventListener('click', function () {
+                manageSection.style.display = 'none';
+                manageCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            });
+        }
+    });
+
+        document.addEventListener('DOMContentLoaded', function () {
+        const reportsCard = document.querySelector('.reports-card');
+        const reportsSection = document.getElementById('reportsSection');
+        const closeReportsBtn = document.getElementById('closeReports');
+
+        // Show section when card is clicked
+        if (reportsCard) {
+            reportsCard.addEventListener('click', function () {
+                const isVisible = window.getComputedStyle(reportsSection).display !== 'none';
+                if (!isVisible) {
+                    reportsSection.style.display = 'block';
+                    reportsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        }
+
+        // Hide section when cancel button is clicked
+        if (closeReportsBtn) {
+            closeReportsBtn.addEventListener('click', function () {
+                reportsSection.style.display = 'none';
+                reportsCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            });
+        }
+    });
+</script>

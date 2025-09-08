@@ -1,0 +1,454 @@
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+    padding-top: 70px;
+    margin-bottom: 60px;
+    background-color: #121212; /* dark gray / almost black */
+    color: #e0e0e0; /* default light text color for readability */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.hero-section h1 {
+    color: #0dcaf0; /* same blue as your h2 titles */
+}
+
+.hero-section {
+    margin-top: 90px;
+    position: relative;
+    background-image: url('https://images.pexels.com/photos/7063776/pexels-photo-7063776.jpeg'); /* you can use a darker hero image */
+    background-size: cover;
+    background-position: center;
+    padding: 100px 0;
+    color: #ffffff;
+}
+
+    .hero-section::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.6); /* stronger overlay for dark theme */
+        z-index: 0;
+    }
+
+    .hero-section > * {
+        position: relative;
+        z-index: 1;
+    }
+
+/* Solid blue button */
+.hero-btn {
+    background-color: #0dcaf0; /* same blue as h1/h2 */
+    border-color: #0dcaf0;
+    color: #121212;
+    font-weight: 500;
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+    .hero-btn:hover {
+        background-color: #0aa8c0; /* slightly darker blue on hover */
+        border-color: #0aa8c0;
+    }
+
+/* Outlined blue button */
+.hero-btn-outline {
+    color: #0dcaf0;
+    border-color: #0dcaf0;
+    background-color: transparent;
+    font-weight: 500;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+    .hero-btn-outline:hover {
+        background-color: #0dcaf0; /* fill with blue on hover */
+        color: #ffffff;
+    }
+
+
+.about-section {
+    background-color: #1e1e1e; /* dark gray card-like background */
+    border-radius: 15px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+    padding: 60px 30px;
+}
+
+    .about-section h2 {
+        font-weight: 700;
+        font-size: 2.2rem;
+        color: #0dcaf0; /* same accent color for title */
+    }
+
+    .about-section .about-text {
+        font-size: 1.1rem;
+        line-height: 1.8;
+        color: #f1f1f1;
+        
+    }
+
+
+.features-section {
+    background-color: #1e1e1e; /* dark gray */
+    border-radius: 15px;
+    padding: 60px 30px;
+}
+
+.feature-card {
+    background-color: #2a2a2a; /* slightly lighter than section background */
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.6);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+    .feature-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.8);
+    }
+
+.feature-icon {
+    color: #ffc107;
+}
+
+.feature-card .card-title {
+    font-weight: 600;
+    font-size: 1.2rem;
+    color: #e0e0e0;
+}
+
+.feature-card .card-text {
+    font-size: 0.95rem;
+    color: #cccccc;
+}
+
+/* Existing CSS here... */
+
+/* Add this at the bottom of your custom.css file */
+.about-section h2,
+.features-section h2 {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-weight: 700;
+    font-size: 2.2rem;
+    color: #0dcaf0; /* Keep or adjust color */
+    text-align: center;
+}
+
+.about-section .about-text,
+.feature-card .card-text {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: #f8f9fa;
+}
+
+.feature-card .card-title {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-weight: 600;
+    font-size: 1.2rem;
+    color: #0dcaf0;
+}
+
+.about-section, .features-section {
+    border-radius: 15px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.navbar {
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    padding: 0.8rem 2rem;
+}
+
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.6rem;
+    color: #ffc107;
+}
+
+.navbar-brand:hover {
+    color: #ffca2c;
+}
+
+.nav-link {
+    color: #e0e0e0;
+    font-weight: 500;
+    margin-right: 1rem;
+    transition: color 0.3s, background-color 0.3s;
+}
+
+.nav-link:hover {
+    color: #ffc107;
+}
+
+
+/* Base navbar */
+#mainNavbar {
+    background-color: #ffffff; /* start white */
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    padding: 0.8rem 2rem;
+    transition: background-color 0.4s, color 0.4s;
+}
+
+    /* Brand */
+    #mainNavbar .navbar-brand {
+        font-weight: 700;
+        font-size: 1.6rem;
+        color: #333; /* dark text initially */
+        transition: color 0.3s;
+    }
+
+        #mainNavbar .navbar-brand:hover {
+            color: #0dcaf0; /* hover blue */
+        }
+
+    /* Nav links */
+    #mainNavbar .nav-link {
+        color: #333; /* dark text initially */
+        font-weight: 500;
+        margin-right: 1rem;
+        transition: color 0.3s;
+    }
+
+        #mainNavbar .nav-link:hover {
+            color: #0dcaf0; /* hover blue */
+        }
+
+    /* After scroll */
+    #mainNavbar.scrolled {
+        background-color: #121212; /* dark background */
+    }
+
+        #mainNavbar.scrolled .nav-link,
+        #mainNavbar.scrolled .navbar-brand {
+            color: #0dcaf0; /* text turns blue */
+        }
+
+            #mainNavbar.scrolled .nav-link:hover,
+            #mainNavbar.scrolled .navbar-brand:hover {
+                color: #ffc107; /* golden hover after scroll */
+            }
+
+.auth-card {
+    background-color: #1e1e1e;
+    border-radius: 15px;
+    padding: 2.5rem;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.7);
+    color: #f1f1f1;
+}
+
+.form-floating label {
+    color: #aaa;
+    transition: all 0.3s ease;
+}
+
+.form-control {
+    background-color: #2a2a2a;
+    border: 1px solid #444;
+    color: #f1f1f1;
+    border-radius: 10px;
+    padding: 1rem;
+}
+
+    .form-control:focus {
+        background-color: #2a2a2a;
+        border-color: #0dcaf0; /* blue accent */
+        box-shadow: 0 0 0 0.25rem rgba(13, 202, 240, 0.25);
+        color: #fff;
+    }
+
+.form-floating > .form-control:focus ~ label {
+    color: #0dcaf0;
+}
+
+.auth-btn {
+    background-color: #0dcaf0;
+    border: none;
+    font-weight: 600;
+    padding: 0.75rem;
+    border-radius: 10px;
+    transition: background-color 0.3s;
+}
+
+    .auth-btn:hover {
+        background-color: #0aa8c0;
+    }
+.nav-tabs .nav-link {
+    color: #e0e0e0;
+    background-color: #2a2a2a;
+    border: none;
+    border-radius: 10px 10px 0 0;
+    margin: 0 5px;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+    .nav-tabs .nav-link.active {
+        background-color: #0dcaf0;
+        color: #121212;
+        font-weight: 600;
+    }
+
+    .nav-tabs .nav-link:hover {
+        background-color: #0aa8c0;
+        color: #fff;
+    }
+.form-floating .form-select {
+    background-color: #2a2a2a; /* match text inputs */
+    border: 1px solid #444;
+    color: #f1f1f1;
+    border-radius: 10px;
+    padding: 1rem;
+    appearance: none; /* removes default arrow styling for consistency */
+}
+
+    .form-floating .form-select:focus {
+        border-color: #0dcaf0; /* blue accent */
+        box-shadow: 0 0 0 0.25rem rgba(13, 202, 240, 0.25);
+        color: #fff;
+    }
+
+    .form-floating .form-select option {
+        background-color: #2a2a2a; /* dropdown options dark */
+        color: #f1f1f1;
+    }
+
+/* ========== Dark floating selects (match inputs) ========== */
+
+/* Make the select match the dark input style */
+.form-floating .form-select {
+    background-color: #2a2a2a; /* same dark input bg */
+    color: #f1f1f1; /* light text */
+    border: 1px solid #444;
+    border-radius: 10px;
+    padding: 1.3rem 1rem 0.6rem 1rem; /* extra top padding to make room for floating label */
+    appearance: none; /* remove native arrow styling where possible */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+}
+
+/* Small arrow icon (keeps visual cue) */
+.form-floating .form-select {
+    background-image: linear-gradient(45deg, transparent 50%, #999 50%), linear-gradient(135deg, #999 50%, transparent 50%), linear-gradient(to right, rgba(255,255,255,0.03), rgba(255,255,255,0.03));
+    background-position: calc(100% - 18px) calc(1.2rem + 0.15rem), calc(100% - 12px) calc(1.2rem + 0.15rem), 0 0;
+    background-size: 6px 6px, 6px 6px, 100% 100%;
+    background-repeat: no-repeat;
+}
+
+    /* Options styling - note: some browsers ignore these */
+    .form-floating .form-select option {
+        background-color: #2a2a2a;
+        color: #f1f1f1;
+    }
+
+/* Floating label base */
+.form-floating label {
+    position: absolute;
+    top: 1.05rem; /* sits inside the control initially */
+    left: 1rem;
+    z-index: 2;
+    padding: 0 0.35rem;
+    color: #aaa;
+    pointer-events: none;
+    transition: transform 0.18s ease, color 0.18s ease, font-size 0.18s ease;
+    background-color: transparent; /* will be set on .auth-card below if needed */
+}
+
+/* Give label a tiny backdrop that matches card so it doesn't look blurry on float */
+.auth-card .form-floating label,
+.card .form-floating label {
+    background-color: transparent; /* if the card has dark background this will look fine; change if needed */
+}
+
+/* When focused or filled, float the label up and make it blue */
+.form-floating .form-select:focus ~ label,
+.form-floating .form-control:focus ~ label,
+.form-floating.filled label {
+    transform: translateY(-0.85rem) scale(0.85);
+    color: #0dcaf0; /* your blue accent */
+    font-weight: 600;
+}
+
+/* Make the select show subtle blue glow on focus */
+.form-floating .form-select:focus {
+    border-color: #0dcaf0;
+    box-shadow: 0 0 0 0.25rem rgba(13,202,240,0.12);
+    outline: none;
+    color: #fff;
+}
+
+/* If you want the label to visually "sit" on a darker backdrop when floated (optional) */
+/* .form-floating.filled label { background-color: #1e1e1e; } */
+
+/* Small UX niceties to match input text positions */
+.form-floating .form-control,
+.form-floating .form-select {
+    font-size: 0.95rem;
+}
+
+/* Stat Cards */
+.stat-card {
+    background-color: #1e1e1e;
+    color: #f1f1f1;
+    border: none;
+    border-radius: 12px;
+    transition: transform 0.3s ease;
+}
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+
+/* Feature Cards */
+.feature-card {
+    background-color: #2c2c2c;
+    color: #f1f1f1;
+    border: none;
+    border-radius: 16px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+    .feature-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+        cursor: pointer;
+    }
+
+/* Activity + Chart Cards */
+.activity-card,
+.chart-card {
+    border-radius: 12px;
+    border: none;
+    background-color: #2c2c2c;
+    color: #f1f1f1;
+}
+
+/* Quick Links */
+.quick-link-card {
+    background-color: #1e1e1e;
+    border: none;
+    border-radius: 12px;
+    transition: transform 0.3s ease, background-color 0.3s ease;
+}
+
+    .quick-link-card:hover {
+        background-color: #0dcaf0;
+        color: #fff;
+        transform: translateY(-5px);
+        cursor: pointer;
+    }
