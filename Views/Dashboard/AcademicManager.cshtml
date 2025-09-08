@@ -60,11 +60,68 @@
 
     <!-- Shortcuts Section -->
     <div class="row g-4">
+        <!-- Approve Claims Card -->
         <div class="col-md-4">
-            <div class="card feature-card text-center p-4">
+            <div class="card feature-card text-center p-4 approve-claims-card" style="cursor: pointer;">
                 <i class="bi bi-folder-check display-5 feature-icon"></i>
                 <h5 class="card-title mt-3">Approve Claims</h5>
                 <p class="card-text">Verify and approve claims submitted by coordinators.</p>
+            </div>
+        </div>
+
+        <!-- Approve Claims Section (Hidden by default) -->
+        <div id="approveClaimsSection" class="mt-4" style="display: none;">
+            <div class="card bg-dark text-light">
+                <div class="card-body">
+                    <h4 class="mb-4 text-info">Claims Pending Approval</h4>
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Claim ID</th>
+                                    <th>Coordinator</th>
+                                    <th>Lecturer</th>
+                                    <th>Hours Worked</th>
+                                    <th>Date Submitted</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Sample Data -->
+                                <tr>
+                                    <td>CLM010</td>
+                                    <td>Coordinator A</td>
+                                    <td>John Doe</td>
+                                    <td>25</td>
+                                    <td>2025-09-02</td>
+                                    <td><span class="badge bg-warning">Pending Approval</span></td>
+                                    <td>
+                                        <button class="btn btn-success btn-sm">Approve</button>
+                                        <button class="btn btn-danger btn-sm">Reject</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>CLM011</td>
+                                    <td>Coordinator B</td>
+                                    <td>Jane Smith</td>
+                                    <td>18</td>
+                                    <td>2025-09-04</td>
+                                    <td><span class="badge bg-warning">Pending Approval</span></td>
+                                    <td>
+                                        <button class="btn btn-success btn-sm">Approve</button>
+                                        <button class="btn btn-danger btn-sm">Reject</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Cancel Button -->
+                    <div class="text-end mt-3">
+                        <button id="closeApproveClaims" class="btn btn-outline-light">Cancel</button>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="col-md-4">
@@ -74,12 +131,109 @@
                 <p class="card-text">Add/remove coordinators per department.</p>
             </div>
         </div>
+        <!-- Reports Card -->
         <div class="col-md-4">
-            <div class="card feature-card text-center p-4">
+            <div class="card feature-card text-center p-4 reports-card" style="cursor: pointer;">
                 <i class="bi bi-bar-chart display-5 feature-icon"></i>
-                <h5 class="card-title mt-3">Generate Reports</h5>
-                <p class="card-text">Export and analyze claims data.</p>
+                <h5 class="card-title mt-3">Reports</h5>
+                <p class="card-text">Generate claim and verification reports.</p>
+            </div>
+        </div>
+
+        <!-- Reports Section (Hidden by default) -->
+        <div id="reportsSection" class="mt-4" style="display: none;">
+            <div class="card bg-dark text-light">
+                <div class="card-body">
+                    <h4 class="mb-4 text-info">Reports</h4>
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Report ID</th>
+                                    <th>Claim ID</th>
+                                    <th>Submitted By</th>
+                                    <th>Hours Worked</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Sample Data -->
+                                <tr>
+                                    <td>RPT001</td>
+                                    <td>CLM001</td>
+                                    <td>John Doe</td>
+                                    <td>20</td>
+                                    <td><span class="badge bg-success">Approved</span></td>
+                                    <td>2025-09-01</td>
+                                </tr>
+                                <tr>
+                                    <td>RPT002</td>
+                                    <td>CLM002</td>
+                                    <td>Jane Smith</td>
+                                    <td>15</td>
+                                    <td><span class="badge bg-warning">Pending</span></td>
+                                    <td>2025-09-03</td>
+                                </tr>
+                                <tr>
+                                    <td>RPT003</td>
+                                    <td>CLM003</td>
+                                    <td>Mark Johnson</td>
+                                    <td>22</td>
+                                    <td><span class="badge bg-danger">Rejected</span></td>
+                                    <td>2025-09-05</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Cancel Button -->
+                    <div class="text-end mt-3">
+                        <button id="closeReports" class="btn btn-outline-light">Cancel</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
+<script>
+        document.addEventListener('DOMContentLoaded', function () {
+        const approveClaimsCard = document.querySelector('.approve-claims-card');
+        const approveClaimsSection = document.getElementById('approveClaimsSection');
+        const closeApproveClaims = document.getElementById('closeApproveClaims');
+
+        if (approveClaimsCard && approveClaimsSection && closeApproveClaims) {
+            // Show section on card click
+            approveClaimsCard.addEventListener('click', function () {
+                approveClaimsSection.style.display = 'block';
+                approveClaimsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+
+            // Hide section on cancel button click
+            closeApproveClaims.addEventListener('click', function () {
+                approveClaimsSection.style.display = 'none';
+                approveClaimsCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            });
+        }
+    });
+
+        document.addEventListener('DOMContentLoaded', function () {
+        const reportsCard = document.querySelector('.reports-card');
+        const reportsSection = document.getElementById('reportsSection');
+        const closeReports = document.getElementById('closeReports');
+
+        if (reportsCard && reportsSection && closeReports) {
+            // Show reports section on card click
+            reportsCard.addEventListener('click', function () {
+                reportsSection.style.display = 'block';
+                reportsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+
+            // Hide reports section on cancel button click
+            closeReports.addEventListener('click', function () {
+                reportsSection.style.display = 'none';
+                reportsCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            });
+        }
+    });
+</script>
