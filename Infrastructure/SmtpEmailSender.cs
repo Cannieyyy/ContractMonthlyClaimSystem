@@ -12,6 +12,7 @@ namespace ContractMonthlyClaimSystem.Infrastructure
 
         public async Task SendEmailAsync(string to, string subject, string htmlMessage)
         {
+            // Read SMTP settings from appsettings.json
             var smtp = _config.GetSection("Smtp");
             var host = smtp.GetValue<string>("Host");
             var port = smtp.GetValue<int>("Port");
@@ -20,10 +21,11 @@ namespace ContractMonthlyClaimSystem.Infrastructure
             var from = smtp.GetValue<string>("From");
             var enableSsl = smtp.GetValue<bool>("EnableSsl");
 
+            // This is where you write the code you asked about
             using var client = new SmtpClient(host, port)
             {
                 EnableSsl = enableSsl,
-                Credentials = string.IsNullOrEmpty(user) ? null : new NetworkCredential(user, pass)
+                Credentials = new NetworkCredential(user, pass) // Gmail app password here
             };
 
             using var mail = new MailMessage
@@ -35,8 +37,9 @@ namespace ContractMonthlyClaimSystem.Infrastructure
             };
 
             mail.To.Add(to);
-            await client.SendMailAsync(mail);                
+
+            // Send the email
+            await client.SendMailAsync(mail);
         }
     }
 }
-                                                     
