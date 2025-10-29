@@ -1,4 +1,4 @@
-﻿@model LectureDashboardViewModel
+﻿@model ContractMonthlyClaimSystem.Models.CoordinatorDashboardViewModel
 
 @{
     ViewData["Title"] = "Lecture Dashboard";
@@ -143,7 +143,7 @@
         <div class="col-md-3">
             <div class="card stat-card">
                 <div class="card-body">
-                    <i class="bi bi-check-circle display-6 text-success"></i>
+                    <i class="bi bi-hourglass-split display-6 text-warning"></i>
                     <h5 class="mt-3">Verified</h5>
                     <h2 class="fw-bold">@ViewBag.VerifiedClaims</h2>
                 </div>
@@ -152,9 +152,9 @@
         <div class="col-md-3">
             <div class="card stat-card">
                 <div class="card-body">
-                    <i class="bi bi-hourglass-split display-6 text-warning"></i>
-                    <h5 class="mt-3">Pending</h5>
-                    <h2 class="fw-bold">@ViewBag.PendingClaims</h2>
+                    <i class="bi bi-check-circle display-6 text-success"></i>
+                    <h5 class="mt-3">Approved</h5>
+                    <h2 class="fw-bold">@ViewBag.ApprovedClaims</h2>
                 </div>
             </div>
         </div>
@@ -276,21 +276,30 @@
                                         <td>@c.ClaimDate.ToString("yyyy-MM")</td>
                                         <td>@c.HoursWorked</td>
                                         <td>
-                                            @if (string.Equals(c.Status, "Pending", StringComparison.OrdinalIgnoreCase))
-                                            {
-                                                <span class="badge bg-warning">Pending</span>
-                                            }
-                                            else if (string.Equals(c.Status, "Verified", StringComparison.OrdinalIgnoreCase))
-                                            {
-                                                <span class="badge bg-success">Verified</span>
-                                            }
-                                            else if (string.Equals(c.Status, "Deleted", StringComparison.OrdinalIgnoreCase))
+                                            @if (c.IsDeleted)
                                             {
                                                 <span class="badge bg-secondary">Deleted</span>
                                             }
+                                            else if (c.Status == "Pending")
+                                            {
+                                                <span class="badge bg-warning">Pending</span>
+                                            }
+                                            else if (c.Status == "Verified" || c.Status == "Verified")
+                                            {
+                                                <span class="badge bg-warning">Verified</span>
+                                            }
+
+                                            else if (c.Status == "Approved")
+                                            {
+                                                <span class="badge bg-success">Approved</span>
+                                            }
+                                            else if (c.Status == "Rejected")
+                                            {
+                                                <span class="badge bg-danger">Rejected</span>
+                                            }
                                             else
                                             {
-                                                <span class="badge bg-danger">@c.Status</span>
+                                                <span class="badge bg-secondary">@c.Status</span>
                                             }
                                         </td>
 

@@ -28,25 +28,33 @@ namespace ContractMonthlyClaimSystem.Controllers
         // GET: /Manager
         public async Task<IActionResult> Index()
         {
-            // Similar to Coordinator.Index: load claims for display (non-deleted)
-            var deptId = HttpContext.Session.GetInt32("DepartmentID");
+            var empId = HttpContext.Session.GetInt32("EmployeeID");
+            if (empId == null) return RedirectToAction("Login_Register", "Home");
 
-            var claimsQuery = _db.Claims
-                .Include(c => c.Employee)
-                .Include(c => c.SupportingDocuments)
-                .Where(c => !c.IsDeleted);
+            // Load employee (optional)
+            var employee = await _db.Employees.AsNoTracking().FirstOrDefaultAsync(e => e.EmployeeID == empId.Value);
+            if (employee == null) return RedirectToAction("Login_Register", "Home");
 
-            if (deptId.HasValue)
-                claimsQuery = claimsQuery.Where(c => c.Employee.DepartmentID == deptId.Value);
-
-            var claims = await claimsQuery
+            // Important: include SupportingDocuments
+            var claims = await _db.Claims
+                .Where(c => c.EmployeeID == empId.Value)
+                .Include(c => c.SupportingDocuments)    // <--- this ensures docs appear
                 .OrderByDescending(c => c.DateCreated)
                 .AsNoTracking()
                 .ToListAsync();
 
-            // You can pass a minimal model or ViewBag; the view you pasted doesn't require a model,
-            // but returning View() will render the view.
-            return View();
+            var vm = new CoordinatorDashboardViewModel
+            {
+                Claims = claims
+            };
+
+            ViewBag.TotalClaims = claims.Count;
+            ViewBag.VerifiedClaims = claims.Count(c => c.Status == "Verified");
+            ViewBag.ApprovedClaims = claims.Count(c => c.Status == "Approved");
+            ViewBag.RejectedClaims = claims.Count(c => c.Status == "Rejected");
+
+
+            return View("ProgramCoordinator", vm);
         }
 
         // GET: /Manager/GetClaimsForApproval
@@ -102,6 +110,7 @@ namespace ContractMonthlyClaimSystem.Controllers
             if (empId == null || string.IsNullOrEmpty(role))
                 return Json(new { success = false, message = "Not authenticated." });
 
+            // Same role checks as coordinator.VerifyClaim
             if (!role.Equals("Manager", StringComparison.OrdinalIgnoreCase))
                 return Forbid();
 
@@ -116,7 +125,7 @@ namespace ContractMonthlyClaimSystem.Controllers
             if (claim == null)
                 return NotFound(new { success = false, message = "Claim not found." });
 
-            // Ensure claim belongs to manager's department
+            // Only claims that belong to the manager's department are actionable (same as coordinator)
             var claimEmployee = await _db.Employees.AsNoTracking().FirstOrDefaultAsync(e => e.EmployeeID == claim.EmployeeID);
             if (claimEmployee == null || claimEmployee.DepartmentID != manager.DepartmentID)
                 return Json(new { success = false, message = "You cannot act on claims outside your department." });
@@ -137,7 +146,7 @@ namespace ContractMonthlyClaimSystem.Controllers
                     Remarks = string.IsNullOrWhiteSpace(comment) ? null : comment
                 };
 
-                _db.Set<Approval>().Add(approval); // Assumes Approval model and DbSet<Approval> exist
+                _db.Set<Approval>().Add(approval);
 
                 await _db.SaveChangesAsync();
 
@@ -145,8 +154,10 @@ namespace ContractMonthlyClaimSystem.Controllers
             }
             else
             {
-                return BadRequest(new { success = false, message = "Deleted claims cannot be approved." });
+                // Mirror coordinator behavior: return Json for error message (coordinator used BadRequest in verify, but Json keeps client handling uniform)
+                return Json(new { success = false, message = "Deleted claims cannot be approved." });
             }
         }
+
     }
 }

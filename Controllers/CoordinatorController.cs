@@ -28,32 +28,31 @@ namespace ContractMonthlyClaimSystem.Controllers
         // GET: /Coordinator
         public async Task<IActionResult> Index()
         {
-            // Get coordinator's department (assuming stored in session)
-            var deptId = HttpContext.Session.GetInt32("DepartmentID");
+            var empId = HttpContext.Session.GetInt32("EmployeeID");
+            if (empId == null) return RedirectToAction("Login_Register", "Home");
 
-            // Query claims for the coordinator's department (exclude deleted)
-            var claimsQuery = _db.Claims
-                .Include(c => c.Employee)
-                .Include(c => c.SupportingDocuments) // optional, if view needs documents
-                .Where(c => !c.IsDeleted);
+            // Load employee (optional)
+            var employee = await _db.Employees.AsNoTracking().FirstOrDefaultAsync(e => e.EmployeeID == empId.Value);
+            if (employee == null) return RedirectToAction("Login_Register", "Home");
 
-            if (deptId.HasValue)
-                claimsQuery = claimsQuery.Where(c => c.Employee.DepartmentID == deptId.Value);
-
-            var claims = await claimsQuery
+            // Important: include SupportingDocuments
+            var claims = await _db.Claims
+                .Where(c => c.EmployeeID == empId.Value)
+                .Include(c => c.SupportingDocuments)    // <--- this ensures docs appear
                 .OrderByDescending(c => c.DateCreated)
                 .AsNoTracking()
                 .ToListAsync();
 
-            // Build view model
             var vm = new CoordinatorDashboardViewModel
             {
-                PendingCount = claims.Count(c => c.Status == "Pending"),
-                InProgress = claims.Count(c => c.Status == "In Progress"),
-                VerifiedCount = claims.Count(c => c.Status == "Verified"),
-                RejectedCount = claims.Count(c => c.Status == "Rejected"),
                 Claims = claims
             };
+
+            ViewBag.TotalClaims = claims.Count;
+            ViewBag.VerifiedClaims = claims.Count(c => c.Status == "Verified");
+            ViewBag.ApprovedClaims = claims.Count(c => c.Status == "Approved");
+            ViewBag.RejectedClaims = claims.Count(c => c.Status == "Rejected");
+
 
             return View(vm);
 
@@ -134,6 +133,11 @@ namespace ContractMonthlyClaimSystem.Controllers
 
             if (!string.Equals(claim.Status, "Deleted", StringComparison.OrdinalIgnoreCase))
             {
+                // NEW: block verifying if already approved
+                if (string.Equals(claim.Status, "Approved", StringComparison.OrdinalIgnoreCase))
+                
+                    return Json(new { success = false, message = "Approved claims cannot be verified." });
+                
                 claim.Status = "Verified";
                 _db.Claims.Update(claim);
 

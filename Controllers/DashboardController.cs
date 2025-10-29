@@ -174,14 +174,14 @@ namespace ContractMonthlyClaimSystem.Controllers
                 .AsNoTracking()
                 .ToListAsync();
 
-            var vm = new LectureDashboardViewModel
+            var vm = new CoordinatorDashboardViewModel
             {
                 Claims = claims
             };
 
             ViewBag.TotalClaims = claims.Count;
             ViewBag.VerifiedClaims = claims.Count(c => c.Status == "Verified");
-            ViewBag.PendingClaims = claims.Count(c => c.Status == "Pending");
+            ViewBag.ApprovedClaims = claims.Count(c => c.Status == "Approved");
             ViewBag.RejectedClaims = claims.Count(c => c.Status == "Rejected");
 
 
@@ -237,24 +237,30 @@ namespace ContractMonthlyClaimSystem.Controllers
             var empId = HttpContext.Session.GetInt32("EmployeeID");
             if (empId == null) return RedirectToAction("Login_Register", "Home");
 
+            // Load employee (optional)
+            var employee = await _db.Employees.AsNoTracking().FirstOrDefaultAsync(e => e.EmployeeID == empId.Value);
+            if (employee == null) return RedirectToAction("Login_Register", "Home");
+
+            // Important: include SupportingDocuments
             var claims = await _db.Claims
-                .Include(c => c.Employee)
-                .Include(c => c.SupportingDocuments)
-                .Where(c => c.Status == "Pending") // or whatever filter is appropriate
+                .Where(c => c.EmployeeID == empId.Value)
+                .Include(c => c.SupportingDocuments)    // <--- this ensures docs appear
                 .OrderByDescending(c => c.DateCreated)
                 .AsNoTracking()
                 .ToListAsync();
 
             var vm = new CoordinatorDashboardViewModel
             {
-                PendingCount = claims.Count(c => c.Status == "Pending"),
-                InProgress = claims.Count(c => c.Status == "In Progress"),
-                VerifiedCount = claims.Count(c => c.Status == "Verified" || c.Status == "Verified"),
-                RejectedCount = claims.Count(c => c.Status == "Rejected"),
                 Claims = claims
             };
 
-            return View("ProgramCoordinator", vm); //
+            ViewBag.TotalClaims = claims.Count;
+            ViewBag.VerifiedClaims = claims.Count(c => c.Status == "Verified");
+            ViewBag.ApprovedClaims = claims.Count(c => c.Status == "Approved");
+            ViewBag.RejectedClaims = claims.Count(c => c.Status == "Rejected");
+
+
+            return View("ProgramCoordinator",vm);
         }
 
         public async Task<IActionResult> AcademicManager()
@@ -262,38 +268,28 @@ namespace ContractMonthlyClaimSystem.Controllers
             var empId = HttpContext.Session.GetInt32("EmployeeID");
             if (empId == null) return RedirectToAction("Login_Register", "Home");
 
-            // optionally scope to manager's department if you store DepartmentID in session
-            var deptId = HttpContext.Session.GetInt32("DepartmentID");
+            // Load employee (optional)
+            var employee = await _db.Employees.AsNoTracking().FirstOrDefaultAsync(e => e.EmployeeID == empId.Value);
+            if (employee == null) return RedirectToAction("Login_Register", "Home");
 
-            var claimsQuery = _db.Claims
-                .Include(c => c.Employee)
-                .Include(c => c.SupportingDocuments)
-                .Where(c => !c.IsDeleted);
-
-            // Manager likely cares about claims pending approval (or pending), adjust if you prefer:
-            // claimsQuery = claimsQuery.Where(c => c.Status == "Pending" || c.Status == "PendingApproval");
-            // For safety (minimal change) we'll include Pending and PendingApproval:
-            claimsQuery = claimsQuery.Where(c => c.Status == "Pending" || c.Status == "PendingApproval");
-
-            if (deptId.HasValue)
-            {
-                claimsQuery = claimsQuery.Where(c => c.Employee.DepartmentID == deptId.Value);
-            }
-
-            var claims = await claimsQuery
+            // Important: include SupportingDocuments
+            var claims = await _db.Claims
+                .Where(c => c.EmployeeID == empId.Value)
+                .Include(c => c.SupportingDocuments)    // <--- this ensures docs appear
                 .OrderByDescending(c => c.DateCreated)
                 .AsNoTracking()
                 .ToListAsync();
 
             var vm = new CoordinatorDashboardViewModel
             {
-                PendingCount = claims.Count(c => c.Status == "Pending" || c.Status == "PendingApproval"),
-                InProgress = claims.Count(c => c.Status == "In Progress"),
-                // Manager considers "Approved" to be the approved status
-                VerifiedCount = claims.Count(c => c.Status == "Verified" || c.Status == "Approved"),
-                RejectedCount = claims.Count(c => c.Status == "Rejected"),
                 Claims = claims
             };
+
+            ViewBag.TotalClaims = claims.Count;
+            ViewBag.VerifiedClaims = claims.Count(c => c.Status == "Verified");
+            ViewBag.ApprovedClaims = claims.Count(c => c.Status == "Approved");
+            ViewBag.RejectedClaims = claims.Count(c => c.Status == "Rejected");
+
 
             return View(vm);
         }

@@ -17,6 +17,8 @@ namespace ContractMonthlyClaimSystem.Data
 
         public DbSet<Verification> Verifications { get; set; }
 
+        public DbSet<Approval> Approvals { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -29,6 +31,7 @@ namespace ContractMonthlyClaimSystem.Data
             modelBuilder.Entity<Claim>().ToTable("Claims");
             modelBuilder.Entity<SupportingDocument>().ToTable("SupportingDocuments");
             modelBuilder.Entity<Verification>().ToTable("Verification");
+            modelBuilder.Entity<Approval>().ToTable("Approval");
 
             modelBuilder.Entity<Claim>()
     .HasOne(c => c.Employee)

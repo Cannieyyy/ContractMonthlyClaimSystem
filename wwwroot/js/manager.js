@@ -43,6 +43,7 @@
             tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted">Loading...</td></tr>';
 
             try {
+                // Using the same endpoint as coordinator as you requested
                 const res = await fetch('/Coordinator/GetClaimsForVerification', { method: 'GET', credentials: 'same-origin' });
                 if (!res.ok) throw new Error('Failed to fetch claims');
 
@@ -94,32 +95,34 @@
 
                 // Attach Approve/reject handlers
                 tbody.querySelectorAll('.action-Approve').forEach(btn => {
-                    btn.addEventListener('click', function () {
+                    btn.addEventListener('click', async function () {
                         const id = this.getAttribute('data-claim-id');
                         if (!id) return alert('Claim ID missing');
                         if (!confirm('Approve claim #' + id + '?')) return;
 
-                        fetch('/Manager/ApproveClaim', {
-                            method: 'POST',
-                            credentials: 'same-origin',
-                            headers: {
-                                'Content-Type': 'application/x-www-form-urlencoded',
-                                'RequestVerificationToken': getAntiForgeryToken()
-                            },
-                            body: 'claimId=' + encodeURIComponent(id)
-                        })
-                            .then(r => {
-                                if (r.ok) {
-                                    alert('Claim approved');
-                                    loadClaims();
-                                } else {
-                                    alert('Failed to approve claim');
-                                }
-                            })
-                            .catch(e => {
-                                console.error(e);
-                                alert('Error approving claim');
+                        try {
+                            const r = await fetch('/Manager/ApproveClaim', {
+                                method: 'POST',
+                                credentials: 'same-origin',
+                                headers: {
+                                    'Content-Type': 'application/x-www-form-urlencoded',
+                                    'RequestVerificationToken': getAntiForgeryToken()
+                                },
+                                body: 'claimId=' + encodeURIComponent(id)
                             });
+
+                            // Read JSON for success or failure (important)
+                            const j = await r.json();
+                            if (j.success) {
+                                alert(j.message || 'Claim approved');
+                                loadClaims();
+                            } else {
+                                alert(j.message || 'Failed to approve claim');
+                            }
+                        } catch (e) {
+                            console.error(e);
+                            alert('Error approving claim');
+                        }
                     });
                 });
 
@@ -140,12 +143,13 @@
                             },
                             body: 'claimId=' + encodeURIComponent(id) + '&comment=' + encodeURIComponent(comment)
                         })
-                            .then(r => {
-                                if (r.ok) {
-                                    alert('Claim rejected');
+                            .then(r => r.json())
+                            .then(j => {
+                                if (j.success) {
+                                    alert(j.message || 'Claim rejected');
                                     loadClaims();
                                 } else {
-                                    alert('Failed to reject claim');
+                                    alert(j.message || 'Failed to reject claim');
                                 }
                             })
                             .catch(e => {

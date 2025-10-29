@@ -9,16 +9,14 @@
         });
     }
 
-    function formatCurrency(n) {
-        if (n == null) return '';
-        return new Intl.NumberFormat('en-ZA', { style: 'currency', currency: 'ZAR' }).format(n);
-    }
+   
 
     function badgeClass(status) {
         if (!status) return 'bg-secondary';
         const s = String(status).toLowerCase();
         if (s === 'pending') return 'bg-warning';
-        if (s === 'Verified' || s === 'verified') return 'bg-success';
+        if (s === 'Verified' || s === 'verified') return 'bg-warning';
+        if (s === 'Approved' || s === 'Approved') return 'bg-success';
         if (s === 'rejected') return 'bg-danger';
         if (s === 'deleted') return 'bg-secondary';
         return 'bg-secondary';
@@ -65,7 +63,7 @@
                     const employeeName = c.EmployeeName ?? c.employeeName ?? (c.employee && (c.employee.Name || c.employee.name)) ?? '';
                     const claimDate = c.ClaimDate ?? c.claimDate ?? '';
                     const hoursWorked = c.HoursWorked ?? c.hoursWorked ?? '';
-                    const totalAmount = c.TotalAmount ?? c.totalAmount ?? '';
+                    
                     const documentId = c.DocumentID ?? c.documentID ?? null;
                     const documentName = c.DocumentName ?? c.documentName ?? '';
                     const status = c.Status ?? c.status ?? '';
@@ -75,7 +73,10 @@
                         : '<span class="text-muted">No doc</span>';
 
                     const isDeleted = String(status).toLowerCase() === 'deleted';
-                    const VerifyBtn = `<button class="btn btn-success btn-sm me-1 action-Verify" data-claim-id="${escapeHtml(String(claimId))}" ${isDeleted ? 'disabled' : ''}>Verify</button>`;
+                    const isApproved = String(status).toLowerCase() === 'approved';
+                    const verifyDisabledAttr = (isDeleted || isApproved) ? 'disabled' : '';
+                    const VerifyBtn = `<button class="btn btn-success btn-sm me-1 action-Verify" data-claim-id="${escapeHtml(String(claimId))}" ${verifyDisabledAttr}>Verify</button>`;
+
                     const rejectBtn = `<button class="btn btn-danger btn-sm action-reject" data-claim-id="${escapeHtml(String(claimId))}" ${isDeleted ? 'disabled' : ''}>Reject</button>`;
 
                     html += `<tr>

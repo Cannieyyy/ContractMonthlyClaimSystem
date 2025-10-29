@@ -1,4 +1,5 @@
-﻿
+﻿@model CoordinatorDashboardViewModel
+
 @{
     ViewData["Title"] = "Manager Dashboard";
 }
@@ -14,51 +15,47 @@
         </p>
     </div>
 
-    <!-- Stats Section -->
-    <div class="row g-4 mb-4">
+    <!-- Quick Stats -->
+    <div class="row g-4 mb-5 text-center">
         <div class="col-md-3">
-            <div class="card feature-card text-center p-3">
-                <i class="bi bi-check2-square display-5 feature-icon"></i>
-                <h5 class="card-title mt-3">Claims to Verify</h5>
-                <p class="card-text">@Model.PendingCount Pending</p>
+            <div class="card stat-card">
+                <div class="card-body">
+                    <i class="bi bi-clipboard-check display-6 text-info"></i>
+                    <h5 class="mt-3">Claims Submitted</h5>
+                    <h2 class="fw-bold">@ViewBag.TotalClaims</h2>
+                </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card feature-card text-center p-3">
-                <i class="bi bi-people display-5 feature-icon"></i>
-                <h5 class="card-title mt-3">Coordinators</h5>
-                <p class="card-text">4 Active</p>
+            <div class="card stat-card">
+                <div class="card-body">
+                    <i class="bi bi-hourglass-split display-6 text-warning"></i>
+                    <h5 class="mt-3">Verified</h5>
+                    <h2 class="fw-bold">@ViewBag.VerifiedClaims</h2>
+                </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card feature-card text-center p-3">
-                <i class="bi bi-bar-chart-line display-5 feature-icon"></i>
-                <h5 class="card-title mt-3">Reports</h5>
-                <p class="card-text">Monthly & Yearly</p>
+            <div class="card stat-card">
+                <div class="card-body">
+                    <i class="bi bi-check-circle display-6 text-success"></i>
+                    <h5 class="mt-3">Approved</h5>
+                    <h2 class="fw-bold">@ViewBag.ApprovedClaims</h2>
+                </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card feature-card text-center p-3">
-                <i class="bi bi-exclamation-triangle display-5 feature-icon"></i>
-                <h5 class="card-title mt-3">Issues</h5>
-                <p class="card-text">@Model.RejectedCount Claims</p>
+            <div class="card stat-card">
+                <div class="card-body">
+                    <i class="bi bi-x-circle display-6 text-danger"></i>
+                    <h5 class="mt-3">Rejected</h5>
+                    <h2 class="fw-bold">@ViewBag.RejectedClaims</h2>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Recent Activity Section -->
-    <div class="card bg-dark text-light mb-4">
-        <div class="card-header border-bottom border-secondary">
-            <h5 class="mb-0">Recent Approvals</h5>
-        </div>
-        <div class="card-body">
-            <ul class="list-group list-group-flush">
-                <li class="list-group-item bg-dark text-light">Claim #102 Verified - Lecturer A</li>
-                <li class="list-group-item bg-dark text-light">Claim #103 flagged for correction - Coordinator B</li>
-                <li class="list-group-item bg-dark text-light">Claim #104 Verified - Lecturer C</li>
-            </ul>
-        </div>
-    </div>
+    
 
     <!-- Shortcuts Section -->
     <div class="row g-4">
@@ -247,6 +244,37 @@
                         <button id="closeReports" class="btn btn-outline-light">Cancel</button>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+
+<!-- Quick Links -->
+<div class="row g-4 text-center">
+    <div class="col-md-4">
+        <div class="card quick-link-card">
+            <div class="card-body">
+                <i class="bi bi-person-circle display-6 text-info"></i>
+                <h5 class="mt-2">Profile Settings</h5>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card quick-link-card">
+            <div class="card-body">
+                <i class="bi bi-question-circle display-6 text-info"></i>
+                <h5 class="mt-2">Help Center</h5>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card quick-link-card">
+            <div class="card-body">
+                <i class="bi bi-box-arrow-right display-6 text-danger"></i>
+                <h5 class="mt-2"><a asp-area="" asp-controller="Home" asp-action="Login_Register">Log Out</a></h5>
+
             </div>
         </div>
     </div>

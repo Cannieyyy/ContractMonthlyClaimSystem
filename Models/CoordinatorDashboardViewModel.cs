@@ -8,7 +8,7 @@
         public int RejectedCount { get; set; }
 
         // Optional: if you also pass claims to the view
-        public List<Claim> Claims { get; set; }
+        public List<Claim> Claims { get; set; } = new List<Claim>();
     }
 
 }
