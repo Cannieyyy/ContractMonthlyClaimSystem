@@ -1,14 +1,12 @@
-﻿@{
+﻿@model ContractMonthlyClaimSystem.Models.RegisterViewModel
+@{
     ViewData["Title"] = "Login / Register";
 }
 
 <div class="hero-section  text-center">
     <h1 class="display-3 fw-bold">Time2Pay Portal</h1>
     <p class="lead text-light">Login or Register to manage your monthly claims efficiently.</p>
-
 </div>
-
-
 
 <div class="container my-5">
     <div class="row justify-content-center">
@@ -32,55 +30,70 @@
                 <div class="tab-content" id="authTabsContent">
                     <!-- Login Form -->
                     <div class="tab-pane fade show active" id="login" role="tabpanel" aria-labelledby="login-tab">
-                        <form>
+                        <form asp-controller="Home" asp-action="Login" method="post">
+                            @Html.AntiForgeryToken()
+
+                            @if (ViewBag.ErrorMessage != null)
+                            {
+                                <div class="alert alert-danger text-center" role="alert">
+                                    @ViewBag.ErrorMessage
+                                </div>
+                            }
+
                             <div class="form-floating mb-3">
-                                <input type="email" class="form-control" id="loginEmail" placeholder="name@example.com">
+                                <input name="email" type="email" class="form-control" id="loginEmail" placeholder="name@example.com" required>
                                 <label for="loginEmail">Email address</label>
                             </div>
 
                             <div class="form-floating mb-4">
-                                <input type="password" class="form-control" id="loginPassword" placeholder="Password">
+                                <input name="password" type="password" class="form-control" id="loginPassword" placeholder="Password" required>
                                 <label for="loginPassword">Password</label>
                             </div>
-                            <a class="btn w-100 auth-btn" asp-area="" asp-controller="Dashboard" asp-action="Lecture">Login</a>
 
-                            
+                            <button type="submit" class="btn w-100 auth-btn">Login</button>
                         </form>
                     </div>
 
                     <!-- Register Form -->
                     <div class="tab-pane fade" id="register" role="tabpanel" aria-labelledby="register-tab">
-                        <form>
+                        @* Use asp-action to post to HomeController.Register *@
+                        <form asp-action="Register" asp-controller="Home" method="post" novalidate>
+                            @Html.AntiForgeryToken()
+                            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
                             <div class="form-floating mb-3">
-                                <input type="text" class="form-control" id="employeeName" placeholder="Full Name">
+                                <input asp-for="Name" class="form-control" id="employeeName" placeholder="Full Name" />
                                 <label for="employeeName">Full Name</label>
+                                <span asp-validation-for="Name" class="text-danger" id="danger"></span>
                             </div>
 
                             <div class="form-floating mb-3">
-                                <input type="email" class="form-control" id="employeeEmail" placeholder="Email">
+                                <input asp-for="Email" class="form-control" id="employeeEmail" placeholder="Email" />
                                 <label for="employeeEmail">Email</label>
+                                <span asp-validation-for="Email" class="text-danger" id="danger"></span>
                             </div>
 
                             <div class="form-floating mb-3">
-                                <select class="form-select" id="employeeDepartment" aria-label="Department">
-                                    <option value=""></option>
-                                    <option value="1">Diploma in Software Development</option>
-                                    <option value="2">Bachlor in Information Technology</option>
-                                    <option value="3">Advanced Diploma in Application Development</option>
+                                @* Departments populated from ViewBag.Departments in controller *@
+                                <select asp-for="DepartmentID"
+                                        class="form-select"
+                                        asp-items="@(new Microsoft.AspNetCore.Mvc.Rendering.SelectList(ViewBag.Departments, "DepartmentID", "Name"))"
+                                        id="employeeDepartment" aria-label="Department">
+                                    <option value="">-- Select Department --</option>
                                 </select>
                                 <label for="employeeDepartment">Department</label>
+                                <span asp-validation-for="DepartmentID" class="text-danger" id="danger"></span>
                             </div>
 
-                            
-
                             <div class="form-floating mb-4">
-                                <select class="form-select" id="employeeRole" aria-label="Role">
-                                    <option value=""></option>
+                                <select asp-for="Role" class="form-select" id="employeeRole" aria-label="Role">
+                                    <option value="">-- Select Role --</option>
                                     <option value="Lecturer">Lecturer</option>
                                     <option value="Coordinator">Coordinator</option>
                                     <option value="Manager">Manager</option>
                                 </select>
                                 <label for="employeeRole">Role</label>
+                                <span asp-validation-for="Role" class="text-danger" id="danger"></span>
                             </div>
 
                             <!-- OTP Notification and Send Button (hidden initially) -->
@@ -89,26 +102,28 @@
                                     Since you selected a privileged role, a One-Time Pin (OTP) will be sent to your department manager.
                                     Please request it from them to complete registration.
                                 </small>
-                                <button type="button" class="btn w-100 auth-btn">Send OTP to Manager</button>
+                                <button type="button" id="sendOtpBtn" class="btn w-100 auth-btn">Send OTP to Manager</button>
                             </div>
 
                             <!-- OTP Input (hidden initially) -->
                             <div class="form-floating mb-4" id="otpContainer" style="display: none;">
-                                <input type="text" class="form-control" id="otpInput" placeholder="Enter OTP">
+                                <input asp-for="OtpCode" class="form-control" id="otpInput" placeholder="Enter OTP" type="text" />
                                 <label for="otpInput">One-Time Pin</label>
                             </div>
 
                             <div class="form-floating mb-4">
-                                <input type="password" class="form-control" id="registerPassword" placeholder="Password">
+                                <input asp-for="Password" class="form-control" id="registerPassword" placeholder="Password" type="password" />
                                 <label for="registerPassword">Password</label>
+                                <span asp-validation-for="Password" class="text-danger" id="danger"></span>
                             </div>
 
                             <div class="form-floating mb-4">
-                                <input type="password" class="form-control" id="registerConfirmPassword" placeholder="Confirm Password">
+                                <input asp-for="ConfirmPassword" class="form-control" id="registerConfirmPassword" placeholder="Confirm Password" type="password" />
                                 <label for="registerConfirmPassword">Confirm Password</label>
+                                <span asp-validation-for="ConfirmPassword" class="text-danger" id="danger"></span>
                             </div>
 
-                            <button type="submit" class="btn w-100 auth-btn">Register</button>
+                            <button type="submit" id="registerSubmit" class="btn w-100 auth-btn">Register</button>
                         </form>
                     </div>
                 </div>
@@ -116,5 +131,64 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    @* jquery-validation unobtrusive scripts *@
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        sendOtpBtn.addEventListener('click', async function () {
+            const email = document.getElementById('employeeEmail').value;
+            const departmentSelect = document.getElementById('employeeDepartment');
+            const departmentId = departmentSelect ? departmentSelect.value : '';
+
+            if (!email) { alert('Enter your email first'); return; }
+
+            const tokenElem = document.querySelector('input[name="__RequestVerificationToken"]');
+            const token = tokenElem ? tokenElem.value : '';
+
+            const formData = new FormData();
+            formData.append('email', email);
+            formData.append('departmentId', departmentId);
+
+            try {
+                sendOtpBtn.disabled = true;
+                sendOtpBtn.textContent = 'Sending...';
+
+                const resp = await fetch('@Url.Action("SendOtp", "Home")', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'RequestVerificationToken': token
+                    }
+                });
+
+                // Always attempt to read the response as text (works with JSON too)
+                const text = await resp.text();
+
+                if (resp.ok) {
+                    // try parse JSON message if it's JSON, else show text
+                    try {
+                        const data = JSON.parse(text);
+                        alert(data.message || JSON.stringify(data));
+                    } catch (e) {
+                        alert(text || 'OTP sent successfully.');
+                    }
+                    return;
+                } else {
+                    // not OK — show server-sent message (or default)
+                    const messageToShow = text || 'Failed to send OTP (server returned ' + resp.status + ')';
+                    alert('Failed to send OTP: ' + messageToShow);
+                    return;
+                }
+            } catch (ex) {
+                // network or JS error
+                alert('An unexpected error occurred while sending OTP: ' + (ex.message || ex));
+            } finally {
+                sendOtpBtn.disabled = false;
+                sendOtpBtn.textContent = 'Send OTP to Manager';
+            }
+        });
+
+    </script>
     
-    
+}

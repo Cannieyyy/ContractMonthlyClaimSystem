@@ -18,7 +18,7 @@ This system allows **lecturers, coordinators, and managers** to manage claims ef
 - Generate reports for departmental claims.  
 
 ###  Academic Manager
-- Approve verified claims.  
+- Verify verified claims.  
 - Oversee coordinators and lecturers.  
 - Access consolidated reports.  
 

@@ -4,12 +4,13 @@
 
 <div class="container-fluid py-4">
     <!-- Page Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="text-info fw-bold">Manager Dashboard</h1>
-        <div>
-            <a href="#" class="btn btn-outline-light">Profile</a>
-            <a class="btn btn-outline-danger" asp-area="" asp-controller="Home" asp-action="Login_Register">Logout</a>
-        </div>
+    <div class="text-center mb-5">
+
+        <h1 class="hero-h1">Welcome back, @Context.Session.GetString("EmployeeName")!</h1>
+
+        <p class="text-muted">
+            Today is <span id="currentDate"></span> | Role: @Context.Session.GetString("Role")
+        </p>
     </div>
 
     <!-- Stats Section -->
@@ -17,7 +18,7 @@
         <div class="col-md-3">
             <div class="card feature-card text-center p-3">
                 <i class="bi bi-check2-square display-5 feature-icon"></i>
-                <h5 class="card-title mt-3">Claims to Approve</h5>
+                <h5 class="card-title mt-3">Claims to Verify</h5>
                 <p class="card-text">15 Pending</p>
             </div>
         </div>
@@ -51,26 +52,26 @@
         </div>
         <div class="card-body">
             <ul class="list-group list-group-flush">
-                <li class="list-group-item bg-dark text-light">Claim #102 approved - Lecturer A</li>
+                <li class="list-group-item bg-dark text-light">Claim #102 Verified - Lecturer A</li>
                 <li class="list-group-item bg-dark text-light">Claim #103 flagged for correction - Coordinator B</li>
-                <li class="list-group-item bg-dark text-light">Claim #104 approved - Lecturer C</li>
+                <li class="list-group-item bg-dark text-light">Claim #104 Verified - Lecturer C</li>
             </ul>
         </div>
     </div>
 
     <!-- Shortcuts Section -->
     <div class="row g-4">
-        <!-- Approve Claims Card -->
+        <!-- Verify Claims Card -->
         <div class="col-md-4">
-            <div class="card feature-card text-center p-4 approve-claims-card" style="cursor: pointer;">
+            <div class="card feature-card text-center p-4 Verify-claims-card" style="cursor: pointer;">
                 <i class="bi bi-folder-check display-5 feature-icon"></i>
-                <h5 class="card-title mt-3">Approve Claims</h5>
-                <p class="card-text">Verify and approve claims submitted by coordinators.</p>
+                <h5 class="card-title mt-3">Verify Claims</h5>
+                <p class="card-text">Verify and Verify claims submitted by coordinators.</p>
             </div>
         </div>
 
-        <!-- Approve Claims Section (Hidden by default) -->
-        <div id="approveClaimsSection" class="mt-4" style="display: none;">
+        <!-- Verify Claims Section (Hidden by default) -->
+        <div id="VerifyClaimsSection" class="mt-4" style="display: none;">
             <div class="card bg-dark text-light">
                 <div class="card-body">
                     <h4 class="mb-4 text-info">Claims Pending Approval</h4>
@@ -97,7 +98,7 @@
                                     <td>2025-09-02</td>
                                     <td><span class="badge bg-warning">Pending Approval</span></td>
                                     <td>
-                                        <button class="btn btn-success btn-sm">Approve</button>
+                                        <button class="btn btn-success btn-sm">Verify</button>
                                         <button class="btn btn-danger btn-sm">Reject</button>
                                     </td>
                                 </tr>
@@ -109,7 +110,7 @@
                                     <td>2025-09-04</td>
                                     <td><span class="badge bg-warning">Pending Approval</span></td>
                                     <td>
-                                        <button class="btn btn-success btn-sm">Approve</button>
+                                        <button class="btn btn-success btn-sm">Verify</button>
                                         <button class="btn btn-danger btn-sm">Reject</button>
                                     </td>
                                 </tr>
@@ -119,7 +120,7 @@
 
                     <!-- Cancel Button -->
                     <div class="text-end mt-3">
-                        <button id="closeApproveClaims" class="btn btn-outline-light">Cancel</button>
+                        <button id="closeVerifyClaims" class="btn btn-outline-light">Cancel</button>
                     </div>
                 </div>
             </div>
@@ -164,7 +165,7 @@
                                     <td>CLM001</td>
                                     <td>Kopano Leshope</td>
                                     <td>20</td>
-                                    <td><span class="badge bg-success">Approved</span></td>
+                                    <td><span class="badge bg-success">Verified</span></td>
                                     <td>2025-09-01</td>
                                 </tr>
                                 <tr>
@@ -198,21 +199,21 @@
 </div>
 <script>
         document.addEventListener('DOMContentLoaded', function () {
-        const approveClaimsCard = document.querySelector('.approve-claims-card');
-        const approveClaimsSection = document.getElementById('approveClaimsSection');
-        const closeApproveClaims = document.getElementById('closeApproveClaims');
+        const VerifyClaimsCard = document.querySelector('.Verify-claims-card');
+        const VerifyClaimsSection = document.getElementById('VerifyClaimsSection');
+        const closeVerifyClaims = document.getElementById('closeVerifyClaims');
 
-        if (approveClaimsCard && approveClaimsSection && closeApproveClaims) {
+        if (VerifyClaimsCard && VerifyClaimsSection && closeVerifyClaims) {
             // Show section on card click
-            approveClaimsCard.addEventListener('click', function () {
-                approveClaimsSection.style.display = 'block';
-                approveClaimsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            VerifyClaimsCard.addEventListener('click', function () {
+                VerifyClaimsSection.style.display = 'block';
+                VerifyClaimsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
             });
 
             // Hide section on cancel button click
-            closeApproveClaims.addEventListener('click', function () {
-                approveClaimsSection.style.display = 'none';
-                approveClaimsCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            closeVerifyClaims.addEventListener('click', function () {
+                VerifyClaimsSection.style.display = 'none';
+                VerifyClaimsCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
             });
         }
     });
@@ -236,4 +237,16 @@
             });
         }
     });
+
+        // Get current date
+    const today = new Date();
+
+    // Format options
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+
+    // Format the date
+    const formattedDate = today.toLocaleDateString('en-US', options);
+
+    // Insert it into the span
+    document.getElementById('currentDate').textContent = formattedDate;
 </script>

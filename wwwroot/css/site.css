@@ -452,3 +452,7 @@ body {
         transform: translateY(-5px);
         cursor: pointer;
     }
+
+    #danger{
+        font-size:small;
+    }
