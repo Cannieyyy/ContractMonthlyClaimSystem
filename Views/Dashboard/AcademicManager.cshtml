@@ -1,4 +1,5 @@
-﻿@{
+﻿
+@{
     ViewData["Title"] = "Manager Dashboard";
 }
 
@@ -19,7 +20,7 @@
             <div class="card feature-card text-center p-3">
                 <i class="bi bi-check2-square display-5 feature-icon"></i>
                 <h5 class="card-title mt-3">Claims to Verify</h5>
-                <p class="card-text">15 Pending</p>
+                <p class="card-text">@Model.PendingCount Pending</p>
             </div>
         </div>
         <div class="col-md-3">
@@ -40,7 +41,7 @@
             <div class="card feature-card text-center p-3">
                 <i class="bi bi-exclamation-triangle display-5 feature-icon"></i>
                 <h5 class="card-title mt-3">Issues</h5>
-                <p class="card-text">2 Claims</p>
+                <p class="card-text">@Model.RejectedCount Claims</p>
             </div>
         </div>
     </div>
@@ -61,17 +62,21 @@
 
     <!-- Shortcuts Section -->
     <div class="row g-4">
-        <!-- Verify Claims Card -->
+        <!-- Approve Claims Card -->
         <div class="col-md-4">
-            <div class="card feature-card text-center p-4 Verify-claims-card" style="cursor: pointer;">
+            <div class="card feature-card text-center p-4 approve-claims-card" style="cursor: pointer;">
                 <i class="bi bi-folder-check display-5 feature-icon"></i>
-                <h5 class="card-title mt-3">Verify Claims</h5>
-                <p class="card-text">Verify and Verify claims submitted by coordinators.</p>
+                <h5 class="card-title mt-3">Approve Claims</h5>
+                <p class="card-text">Approve claims submitted by coordinators.</p>
             </div>
         </div>
 
-        <!-- Verify Claims Section (Hidden by default) -->
-        <div id="VerifyClaimsSection" class="mt-4" style="display: none;">
+        <!-- Approve Claims Section (Hidden by default) -->
+        <div id="ApproveClaimsSection" class="mt-4" style="display: none;">
+            <form id="antiForgeryForm">
+                @Html.AntiForgeryToken()
+            </form>
+
             <div class="card bg-dark text-light">
                 <div class="card-body">
                     <h4 class="mb-4 text-info">Claims Pending Approval</h4>
@@ -80,51 +85,99 @@
                             <thead>
                                 <tr>
                                     <th>Claim ID</th>
-                                    <th>Coordinator</th>
                                     <th>Lecturer</th>
-                                    <th>Hours Worked</th>
                                     <th>Date Submitted</th>
+                                    <th>Hours Worked</th>
+                                    <th>Document</th>
                                     <th>Status</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <!-- Sample Data -->
-                                <tr>
-                                    <td>CLM010</td>
-                                    <td>Coordinator A</td>
-                                    <td>Kopano Leshope</td>
-                                    <td>25</td>
-                                    <td>2025-09-02</td>
-                                    <td><span class="badge bg-warning">Pending Approval</span></td>
-                                    <td>
-                                        <button class="btn btn-success btn-sm">Verify</button>
-                                        <button class="btn btn-danger btn-sm">Reject</button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>CLM011</td>
-                                    <td>Coordinator B</td>
-                                    <td>Keoagile Mafora</td>
-                                    <td>18</td>
-                                    <td>2025-09-04</td>
-                                    <td><span class="badge bg-warning">Pending Approval</span></td>
-                                    <td>
-                                        <button class="btn btn-success btn-sm">Verify</button>
-                                        <button class="btn btn-danger btn-sm">Reject</button>
-                                    </td>
-                                </tr>
+                                @foreach (var c in Model.Claims)
+                                {
+                                    <tr>
+                                        <td>@c.ClaimID</td>
+                                        <td>@(c.Employee?.Name ?? "—")</td>
+                                        <td>@c.ClaimDate.ToString("yyyy-MM-dd")</td>
+                                        <td>@c.HoursWorked</td>
+
+                                        <!-- Document column -->
+                                        <td>
+                                            @if (c.SupportingDocuments != null && c.SupportingDocuments.Any() == true)
+                                            {
+                                                var doc = c.SupportingDocuments.First();
+                                                <a asp-controller="Dashboard" asp-action="DownloadDocument" asp-route-id="@doc.DocumentID" class="btn btn-sm btn-outline-info">View</a>
+                                                <div class="small text-muted mt-1">@System.IO.Path.GetFileName(doc.FilePath)</div>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">No document</span>
+                                            }
+                                        </td>
+
+                                        <td>
+                                            @if (c.IsDeleted)
+                                            {
+                                                <span class="badge bg-secondary">Deleted</span>
+                                            }
+                                            else if (c.Status == "Pending" || c.Status == "PendingApproval")
+                                            {
+                                                <span class="badge bg-warning">Pending Approval</span>
+                                            }
+                                            else if (c.Status == "Approved")
+                                            {
+                                                <span class="badge bg-success">@c.Status</span>
+                                            }
+                                            else if (c.Status == "Rejected")
+                                            {
+                                                <span class="badge bg-danger">Rejected</span>
+                                            }
+                                            else if (c.Status == "Verified")
+                                            {
+                                                <span class="badge bg-success">@c.Status</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-secondary">@c.Status</span>
+                                            }
+                                        </td>
+
+                                        <td>
+                                            @if (!c.IsDeleted && (c.Status == "Pending" || c.Status == "PendingApproval"))
+                                            {
+                                                <form asp-controller="Manager" asp-action="ApproveClaim" method="post" class="d-inline">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="claimId" value="@c.ClaimID" />
+                                                    <button class="btn btn-success btn-sm">Approve</button>
+                                                </form>
+                                                <form asp-controller="Coordinator" asp-action="RejectClaim" method="post" class="d-inline ms-1">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="claimId" value="@c.ClaimID" />
+                                                    <button class="btn btn-danger btn-sm">Reject</button>
+                                                </form>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">No actions</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
                             </tbody>
+
                         </table>
                     </div>
 
                     <!-- Cancel Button -->
                     <div class="text-end mt-3">
-                        <button id="closeVerifyClaims" class="btn btn-outline-light">Cancel</button>
+                        <button id="closeApproveClaims" class="btn btn-outline-light">Cancel</button>
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- Manage Coordinators Card -->
         <div class="col-md-4">
             <div class="card feature-card text-center p-4">
                 <i class="bi bi-people display-5 feature-icon"></i>
@@ -132,6 +185,7 @@
                 <p class="card-text">Add/remove coordinators per department.</p>
             </div>
         </div>
+
         <!-- Reports Card -->
         <div class="col-md-4">
             <div class="card feature-card text-center p-4 reports-card" style="cursor: pointer;">
@@ -159,7 +213,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <!-- Sample Data -->
+                                <!-- Sample Data (unchanged) -->
                                 <tr>
                                     <td>RPT001</td>
                                     <td>CLM001</td>
@@ -197,56 +251,7 @@
         </div>
     </div>
 </div>
-<script>
-        document.addEventListener('DOMContentLoaded', function () {
-        const VerifyClaimsCard = document.querySelector('.Verify-claims-card');
-        const VerifyClaimsSection = document.getElementById('VerifyClaimsSection');
-        const closeVerifyClaims = document.getElementById('closeVerifyClaims');
 
-        if (VerifyClaimsCard && VerifyClaimsSection && closeVerifyClaims) {
-            // Show section on card click
-            VerifyClaimsCard.addEventListener('click', function () {
-                VerifyClaimsSection.style.display = 'block';
-                VerifyClaimsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            });
+<script src="~/js/manager.js"></script>
 
-            // Hide section on cancel button click
-            closeVerifyClaims.addEventListener('click', function () {
-                VerifyClaimsSection.style.display = 'none';
-                VerifyClaimsCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            });
-        }
-    });
 
-        document.addEventListener('DOMContentLoaded', function () {
-        const reportsCard = document.querySelector('.reports-card');
-        const reportsSection = document.getElementById('reportsSection');
-        const closeReports = document.getElementById('closeReports');
-
-        if (reportsCard && reportsSection && closeReports) {
-            // Show reports section on card click
-            reportsCard.addEventListener('click', function () {
-                reportsSection.style.display = 'block';
-                reportsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            });
-
-            // Hide reports section on cancel button click
-            closeReports.addEventListener('click', function () {
-                reportsSection.style.display = 'none';
-                reportsCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            });
-        }
-    });
-
-        // Get current date
-    const today = new Date();
-
-    // Format options
-    const options = { year: 'numeric', month: 'long', day: 'numeric' };
-
-    // Format the date
-    const formattedDate = today.toLocaleDateString('en-US', options);
-
-    // Insert it into the span
-    document.getElementById('currentDate').textContent = formattedDate;
-</script>

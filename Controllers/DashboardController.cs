@@ -257,11 +257,46 @@ namespace ContractMonthlyClaimSystem.Controllers
             return View("ProgramCoordinator", vm); //
         }
 
-        public IActionResult AcademicManager()
+        public async Task<IActionResult> AcademicManager()
+        {
+            var empId = HttpContext.Session.GetInt32("EmployeeID");
+            if (empId == null) return RedirectToAction("Login_Register", "Home");
+
+            // optionally scope to manager's department if you store DepartmentID in session
+            var deptId = HttpContext.Session.GetInt32("DepartmentID");
+
+            var claimsQuery = _db.Claims
+                .Include(c => c.Employee)
+                .Include(c => c.SupportingDocuments)
+                .Where(c => !c.IsDeleted);
+
+            // Manager likely cares about claims pending approval (or pending), adjust if you prefer:
+            // claimsQuery = claimsQuery.Where(c => c.Status == "Pending" || c.Status == "PendingApproval");
+            // For safety (minimal change) we'll include Pending and PendingApproval:
+            claimsQuery = claimsQuery.Where(c => c.Status == "Pending" || c.Status == "PendingApproval");
+
+            if (deptId.HasValue)
             {
-                // Later: verify user role
-                return View();
+                claimsQuery = claimsQuery.Where(c => c.Employee.DepartmentID == deptId.Value);
             }
+
+            var claims = await claimsQuery
+                .OrderByDescending(c => c.DateCreated)
+                .AsNoTracking()
+                .ToListAsync();
+
+            var vm = new CoordinatorDashboardViewModel
+            {
+                PendingCount = claims.Count(c => c.Status == "Pending" || c.Status == "PendingApproval"),
+                InProgress = claims.Count(c => c.Status == "In Progress"),
+                // Manager considers "Approved" to be the approved status
+                VerifiedCount = claims.Count(c => c.Status == "Verified" || c.Status == "Approved"),
+                RejectedCount = claims.Count(c => c.Status == "Rejected"),
+                Claims = claims
+            };
+
+            return View(vm);
+        }
 
         [HttpPost]
         [ValidateAntiForgeryToken]

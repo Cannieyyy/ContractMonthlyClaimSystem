@@ -31,10 +31,10 @@
 
     // Main
     document.addEventListener('DOMContentLoaded', function () {
-        const verifyCard = document.querySelector('.verify-claims-card');
-        const verifySection = document.getElementById('verifyClaimsSection');
-        const closeVerifyBtn = document.getElementById('closeVerifyClaims');
-        const tbody = verifySection ? verifySection.querySelector('tbody') : null;
+        const approveCard = document.querySelector('.approve-claims-card');
+        const approveSection = document.getElementById('ApproveClaimsSection');
+        const closeApproveBtn = document.getElementById('closeApproveClaims');
+        const tbody = approveSection ? approveSection.querySelector('tbody') : null;
 
         async function loadClaims() {
             if (!tbody) return;
@@ -75,7 +75,7 @@
                         : '<span class="text-muted">No doc</span>';
 
                     const isDeleted = String(status).toLowerCase() === 'deleted';
-                    const VerifyBtn = `<button class="btn btn-success btn-sm me-1 action-Verify" data-claim-id="${escapeHtml(String(claimId))}" ${isDeleted ? 'disabled' : ''}>Verify</button>`;
+                    const ApproveBtn = `<button class="btn btn-success btn-sm me-1 action-Approve" data-claim-id="${escapeHtml(String(claimId))}" ${isDeleted ? 'disabled' : ''}>Approve</button>`;
                     const rejectBtn = `<button class="btn btn-danger btn-sm action-reject" data-claim-id="${escapeHtml(String(claimId))}" ${isDeleted ? 'disabled' : ''}>Reject</button>`;
 
                     html += `<tr>
@@ -86,20 +86,20 @@
                         
                         <td>${docCell}</td>
                         <td><span class="badge ${badgeClass(status)}">${escapeHtml(String(status))}</span></td>
-                        <td>${VerifyBtn}${rejectBtn}</td>
+                        <td>${ApproveBtn}${rejectBtn}</td>
                     </tr>`;
                 }
 
                 tbody.innerHTML = html;
 
-                // Attach Verify/reject handlers
-                tbody.querySelectorAll('.action-Verify').forEach(btn => {
+                // Attach Approve/reject handlers
+                tbody.querySelectorAll('.action-Approve').forEach(btn => {
                     btn.addEventListener('click', function () {
                         const id = this.getAttribute('data-claim-id');
                         if (!id) return alert('Claim ID missing');
-                        if (!confirm('Verify claim #' + id + '?')) return;
+                        if (!confirm('Approve claim #' + id + '?')) return;
 
-                        fetch('/Coordinator/VerifyClaim', {
+                        fetch('/Manager/ApproveClaim', {
                             method: 'POST',
                             credentials: 'same-origin',
                             headers: {
@@ -110,10 +110,10 @@
                         })
                             .then(r => {
                                 if (r.ok) {
-                                    alert('Claim Verified');
+                                    alert('Claim approved');
                                     loadClaims();
                                 } else {
-                                    alert('Failed to Verify claim');
+                                    alert('Failed to approve claim');
                                 }
                             })
                             .catch(e => {
@@ -162,18 +162,18 @@
         }
 
         // Show/Hide sections
-        if (verifyCard && verifySection) {
-            verifyCard.addEventListener('click', function () {
-                verifySection.style.display = 'block';
+        if (approveCard && approveSection) {
+            approveCard.addEventListener('click', function () {
+                approveSection.style.display = 'block';
                 loadClaims();
-                verifySection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                approveSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
             });
         }
 
-        if (closeVerifyBtn && verifySection) {
-            closeVerifyBtn.addEventListener('click', function () {
-                verifySection.style.display = 'none';
-                verifyCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        if (closeApproveBtn && approveSection) {
+            closeApproveBtn.addEventListener('click', function () {
+                approveSection.style.display = 'none';
+                approveCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
             });
         }
 
@@ -236,7 +236,7 @@
 
 
 document.addEventListener('DOMContentLoaded', function () {
-    const tbody = document.querySelector('#verifyClaimsSection tbody');
+    const tbody = document.querySelector('#ApproveClaimsSection tbody');
     if (!tbody) return;
 
     async function loadClaimsDebug() {
@@ -263,7 +263,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     <td>${c.DocumentID ? `<a href="/Dashboard/DownloadDocument/${c.DocumentID}" target="_blank">View</a>` : 'No doc'}</td>
                     <td>${c.Status}</td>
                     <td>
-                        <button class="btn-Verify" data-id="${c.ClaimID}">Verify</button>
+                        <button class="btn-Approve" data-id="${c.ClaimID}">Approve</button>
                         <button class="btn-reject" data-id="${c.ClaimID}">Reject</button>
                     </td>
                 `;
