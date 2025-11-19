@@ -232,6 +232,33 @@ namespace ContractMonthlyClaimSystem.Controllers
             }
         }
 
+        public async Task<IActionResult> HRDashboard()
+        {
+            var empId = HttpContext.Session.GetInt32("EmployeeID");
+            if (empId == null)
+                return RedirectToAction("Login_Register", "Home");
+
+            // (Optional) verify this user is HR
+            var employee = await _db.Employees
+                .AsNoTracking()
+                .FirstOrDefaultAsync(e => e.EmployeeID == empId.Value);
+
+            if (employee == null || employee.Role != "HR Admin")
+                return RedirectToAction("Login_Register", "Home");
+
+            var model = new HRDashboardViewModel
+            {
+                Departments = await _db.Departments.AsNoTracking().ToListAsync(),
+                Employees = await _db.Employees
+                    .Include(e => e.Department)
+                    .AsNoTracking()
+                    .ToListAsync()
+            };
+
+            return View("HRDashboard", model);
+        }
+
+
         public async Task<IActionResult> ProgramCoordinator()
         {
             var empId = HttpContext.Session.GetInt32("EmployeeID");

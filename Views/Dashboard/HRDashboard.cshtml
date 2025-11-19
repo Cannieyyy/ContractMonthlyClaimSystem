@@ -1,0 +1,155 @@
+﻿@model HRDashboardViewModel
+@{
+    ViewData["Title"] = "HR Dashboard";
+}
+
+<div class="container-fluid py-4">
+
+    <!-- Header -->
+    <div class="text-center mb-5">
+        <h1 class="hero-h1">Welcome, @Context.Session.GetString("EmployeeName")</h1>
+        <p class="text-muted">Today is <span id="currentDate"></span> | Role: HR Admin</p>
+    </div>
+
+    <!-- Filters -->
+    <div class="card bg-dark text-light mb-4">
+        <div class="card-body">
+            <h4 class="text-info mb-3">Filter Claims</h4>
+
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label text-light">Department</label>
+                    <select id="filterDepartment" class="form-select">
+                        <option value="">All Departments</option>
+                        @foreach (var d in Model.Departments)
+                        {
+                            <option value="@d.DepartmentID">@d.Name</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label text-light">Status</label>
+                    <select id="filterStatus" class="form-select">
+                        <option value="">All Statuses</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Verified">Verified</option>
+                        <option value="Approved">Approved</option>
+                        <option value="Rejected">Rejected</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label text-light">Month</label>
+                    <select id="filterMonth" class="form-select">
+                        <option value="">All Months</option>
+                        @for (int i = 1; i <= 12; i++)
+                        {
+                            <option value="@i">@System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(i)</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label text-light">Lecturer Name</label>
+                    <input id="filterLecturer" class="form-control" placeholder="Search..." />
+                </div>
+            </div>
+
+            <div class="text-end mt-3">
+                <button id="btnSearch" class="btn btn-info me-2">Search</button>
+                <button id="btnReset" class="btn btn-outline-light">Reset</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Claims Table -->
+    <div class="card bg-dark text-light">
+        <div class="card-body">
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="text-info">Claims Overview</h4>
+                <button id="btnExportBatch" class="btn btn-outline-info">Export All Filtered (PDF)</button>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-dark table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>Claim ID</th>
+                            <th>Lecturer</th>
+                            <th>Department</th>
+                            <th>Date</th>
+                            <th>Hours</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Doc</th>
+                            <th>Invoice</th>
+                        </tr>
+                    </thead>
+                    <tbody id="claimsTable">
+                        <tr>
+                            <td colspan="9" class="text-center text-muted">Use filters to view claims</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Employees -->
+    <div class="card bg-dark text-light mt-4">
+        <div class="card-body">
+            <h4 class="text-info mb-3">Employees Overview</h4>
+
+            <div class="table-responsive">
+                <table class="table table-dark table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Department</th>
+                            <th>Role</th>
+                            <th>Date Created</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var e in Model.Employees)
+                        {
+                            <tr>
+                                <td>@e.Name</td>
+                                <td>@e.Email</td>
+                                <td>@e.Department?.Name</td>
+                                <td>@e.Role</td>
+                                <td>@e.DateCreated.ToString("yyyy-MM-dd")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<!-- Invoice Modal -->
+<div class="modal fade" id="invoiceModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content bg-dark text-light">
+            <div class="modal-header">
+                <h5 class="modal-title text-info">Invoice Details</h5>
+                <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="invoiceBody">
+                <!-- Filled by JS -->
+            </div>
+            <div class="modal-footer">
+                <button id="btnDownloadInvoice" class="btn btn-info">Download PDF</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="~/js/hr.js"></script>

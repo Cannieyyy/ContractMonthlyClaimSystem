@@ -295,6 +295,8 @@ namespace ContractMonthlyClaimSystem.Controllers
                 return RedirectToAction("ProgramCoordinator", "Dashboard");
             else if (role == "manager")
                 return RedirectToAction("AcademicManager", "Dashboard");
+            else if (role == "hr admin")
+                return RedirectToAction("HRDashboard", "Dashboard");
             else
                 return RedirectToAction("Index", "Dashboard");
         }
