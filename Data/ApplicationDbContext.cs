@@ -45,7 +45,8 @@ namespace ContractMonthlyClaimSystem.Data
                 new Department { DepartmentID = 1, Name = "Diploma in Software Development", HourlyRate = 367.50m },
                 new Department { DepartmentID = 2, Name = "Bachelor in Information Technology", HourlyRate = 422.00m },
                 new Department { DepartmentID = 3, Name = "Higher Certificate In Networking", HourlyRate = 423.55m },
-                new Department { DepartmentID = 4, Name = "Diploma in Web Development", HourlyRate = 369.42m }
+                new Department { DepartmentID = 4, Name = "Diploma in Web Development", HourlyRate = 369.42m },
+                new Department { DepartmentID = 5, Name = "Human Resources", HourlyRate = 0 }
             );
 
             // Force all FKs to NoAction (use with caution)

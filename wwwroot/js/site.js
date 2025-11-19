@@ -56,7 +56,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     roleSelect.addEventListener('change', function () {
         const value = roleSelect.value;
-        if (value === 'Coordinator' || value === 'Manager') {
+        if (value === 'Coordinator' || value === 'Manager' || value === 'HR Admin') {
             otpContainer.style.display = 'block';
             otpNotifyContainer.style.display = 'block';
         } else {
