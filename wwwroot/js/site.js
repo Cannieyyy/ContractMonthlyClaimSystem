@@ -432,3 +432,4 @@ document.addEventListener('DOMContentLoaded', function () {
     const dateSpan = document.getElementById('currentDate');
     if (dateSpan) dateSpan.textContent = formattedDate;
 });
+

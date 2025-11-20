@@ -201,7 +201,7 @@
                                     @Html.AntiForgeryToken()
                                     <!-- Hours Worked input remains the same but add name attribute -->
                                     <div class="form-floating mb-3">
-                                        <input name="hoursWorked" type="number" class="form-control bg-secondary text-light" id="hoursWorked" placeholder="Hours Worked" min="0" step="0.01">
+                                        <input name="hoursWorked" type="number" class="form-control bg-secondary text-light" id="hoursWorked" placeholder="Hours Worked" min="1" step="0.01">
                                         <label for="hoursWorked">Hours Worked</label>
                                     </div>
 
@@ -284,24 +284,34 @@
                                             {
                                                 <span class="badge bg-warning">Pending</span>
                                             }
-                                            else if (c.Status == "Verified" || c.Status == "Verified")
+                                            else if (c.Status == "Verified")
                                             {
                                                 <span class="badge bg-warning">Verified</span>
                                             }
-
                                             else if (c.Status == "Approved")
                                             {
                                                 <span class="badge bg-success">Approved</span>
                                             }
                                             else if (c.Status == "Rejected")
                                             {
-                                                <span class="badge bg-danger">Rejected</span>
+                                                var remark = c.Verifications?
+                                                .Select(v => $"Coordinator {v.VerifiedBy}: {v.Remarks}")
+                                                .FirstOrDefault()
+                                                ?? c.Approvals?
+                                                .Select(a => $"Manager {a.ApprovedBy}: {a.Remarks}")
+                                                .FirstOrDefault();
+
+                                                <button type="button" class="btn btn-sm btn-outline-danger view-reject-reason-btn"
+                                                        data-reason="@remark">
+                                                    Rejected
+                                                </button>
                                             }
                                             else
                                             {
                                                 <span class="badge bg-secondary">@c.Status</span>
                                             }
                                         </td>
+
 
                                         <!-- Document column: show first supporting doc (if any) -->
                                         <td>
@@ -318,20 +328,25 @@
                                         </td>
 
                                         <!-- Actions column: edit (modal) + delete (soft) -->
+                                        @{
+                                            bool isApproved = c.Status == "Approved";
+                                        }
+
                                         <td>
                                             <button type="button" class="btn btn-sm btn-outline-warning me-1 edit-claim-btn"
                                                     data-claim-id="@c.ClaimID"
                                                     data-hours="@c.HoursWorked"
                                                     data-month="@c.ClaimDate.ToString("yyyy-MM")"
                                                     data-doc-id="@(c.SupportingDocuments != null && c.SupportingDocuments.Any() ? c.SupportingDocuments.First().DocumentID.ToString() : "")"
-                                                    data-doc-name="@(c.SupportingDocuments != null && c.SupportingDocuments.Any() ? System.IO.Path.GetFileName(c.SupportingDocuments.First().FilePath) : "")">
+                                                    data-doc-name="@(c.SupportingDocuments != null && c.SupportingDocuments.Any() ? System.IO.Path.GetFileName(c.SupportingDocuments.First().FilePath) : "")"
+                                                    @(isApproved ? "disabled" : "")>
                                                 Edit
                                             </button>
 
                                             <form asp-controller="Dashboard" asp-action="DeleteClaim" method="post" class="d-inline-block" onsubmit="return confirm('Are you sure you want to delete this claim?');">
                                                 @Html.AntiForgeryToken()
                                                 <input type="hidden" name="claimId" value="@c.ClaimID" />
-                                                <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" @(isApproved ? "disabled" : "")>Delete</button>
                                             </form>
                                         </td>
                                     </tr>
@@ -451,3 +466,14 @@
     </div>
 </div>
 
+<script>
+        document.querySelectorAll('.view-reject-reason-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            const reason = btn.getAttribute('data-reason') || 'No remark provided';
+            alert(reason);
+        });
+    });
+
+       
+
+</script>

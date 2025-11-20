@@ -31,6 +31,7 @@ namespace ContractMonthlyClaimSystem.Models
         
         
         public virtual ICollection<Verification>? Verifications { get; set; }
+        public virtual ICollection<Approval>? Approvals { get; set; }
 
         public bool IsDeleted { get; set; } = false;
     }

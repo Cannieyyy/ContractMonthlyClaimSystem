@@ -103,6 +103,7 @@ namespace ContractMonthlyClaimSystem.Controllers
 
 
         // POST: /Coordinator/VerifyClaim
+        
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> VerifyClaim(int claimId)
@@ -112,56 +113,55 @@ namespace ContractMonthlyClaimSystem.Controllers
             if (empId == null || string.IsNullOrEmpty(role))
                 return Json(new { success = false, message = "Not authenticated." });
 
-            if (!role.Equals("Coordinator", StringComparison.OrdinalIgnoreCase) && !role.Equals("Manager", StringComparison.OrdinalIgnoreCase))
+            if (!role.Equals("Coordinator", StringComparison.OrdinalIgnoreCase) &&
+                !role.Equals("Manager", StringComparison.OrdinalIgnoreCase))
                 return Forbid();
 
-            var coordinator = await _db.Employees.FirstOrDefaultAsync(e => e.EmployeeID == empId.Value);
-            if (coordinator == null)
-                return Json(new { success = false, message = "Coordinator record not found." });
+            var user = await _db.Employees.FirstOrDefaultAsync(e => e.EmployeeID == empId.Value);
+            if (user == null)
+                return Json(new { success = false, message = "User not found." });
 
             var claim = await _db.Claims
                 .Include(c => c.Employee)
                 .FirstOrDefaultAsync(c => c.ClaimID == claimId);
 
             if (claim == null)
-                return NotFound(new { success = false, message = "Claim not found." });
+                return Json(new { success = false, message = "Claim not found." });
 
-            // Only claims that belong to the coordinator's department are actionable
-            var claimEmployee = await _db.Employees.AsNoTracking().FirstOrDefaultAsync(e => e.EmployeeID == claim.EmployeeID);
-            if (claimEmployee == null || claimEmployee.DepartmentID != coordinator.DepartmentID)
+            // Only act inside same department
+            if (claim.Employee.DepartmentID != user.DepartmentID)
                 return Json(new { success = false, message = "You cannot act on claims outside your department." });
 
-            if (!string.Equals(claim.Status, "Deleted", StringComparison.OrdinalIgnoreCase))
+            // ❌ BLOCK actions on Deleted
+            if (claim.Status.Equals("Deleted", StringComparison.OrdinalIgnoreCase))
+                return Json(new { success = false, message = "Deleted claims cannot be verified." });
+
+            // ❌ BLOCK second verification
+            if (claim.Status.Equals("Verified", StringComparison.OrdinalIgnoreCase))
+                return Json(new { success = false, message = "This claim is already verified." });
+
+            // ❌ BLOCK verification if approved
+            if (claim.Status.Equals("Approved", StringComparison.OrdinalIgnoreCase))
+                return Json(new { success = false, message = "Approved claims cannot be verified." });
+
+            // PASS — verify the claim
+            claim.Status = "Verified";
+            _db.Claims.Update(claim);
+
+            _db.Verifications.Add(new Verification
             {
-                // NEW: block verifying if already approved
-                if (string.Equals(claim.Status, "Approved", StringComparison.OrdinalIgnoreCase))
-                
-                    return Json(new { success = false, message = "Approved claims cannot be verified." });
-                
-                claim.Status = "Verified";
-                _db.Claims.Update(claim);
+                ClaimID = claim.ClaimID,
+                VerifiedBy = user.EmployeeID,
+                VerificationDate = DateTime.UtcNow,
+                Status = "Verified",
+                Remarks = null
+            });
 
-                // Add verification record
-                var verification = new Verification
-                {
-                    ClaimID = claim.ClaimID,
-                    VerifiedBy = coordinator.EmployeeID,
-                    VerificationDate = DateTime.UtcNow,
-                    Status = "Verified",
-                    Remarks = null // optional, or pass comment if you want
-                };
-                _db.Verifications.Add(verification);
+            await _db.SaveChangesAsync();
 
-                await _db.SaveChangesAsync();
-
-                return Json(new { success = true, message = "Claim Verified." });
-            }
-
-            else
-            {
-                return BadRequest(new { success = false, message = "Deleted claims cannot be Verified." });
-            }
+            return Json(new { success = true, message = "Claim Verified." });
         }
+
 
         // POST: /Coordinator/RejectClaim
         [HttpPost]
@@ -173,56 +173,53 @@ namespace ContractMonthlyClaimSystem.Controllers
             if (empId == null || string.IsNullOrEmpty(role))
                 return Json(new { success = false, message = "Not authenticated." });
 
-            if (!role.Equals("Coordinator", StringComparison.OrdinalIgnoreCase) && !role.Equals("Manager", StringComparison.OrdinalIgnoreCase))
+            if (!role.Equals("Coordinator", StringComparison.OrdinalIgnoreCase) &&
+                !role.Equals("Manager", StringComparison.OrdinalIgnoreCase))
                 return Forbid();
 
-            var coordinator = await _db.Employees.FirstOrDefaultAsync(e => e.EmployeeID == empId.Value);
-            if (coordinator == null)
-                return Json(new { success = false, message = "Coordinator record not found." });
+            var user = await _db.Employees.FirstOrDefaultAsync(e => e.EmployeeID == empId.Value);
+            if (user == null)
+                return Json(new { success = false, message = "User not found." });
 
             var claim = await _db.Claims
                 .Include(c => c.Employee)
                 .FirstOrDefaultAsync(c => c.ClaimID == claimId);
 
             if (claim == null)
-                return NotFound(new { success = false, message = "Claim not found." });
+                return Json(new { success = false, message = "Claim not found." });
 
-            // Only claims in same department
-            var claimEmployee = await _db.Employees.AsNoTracking().FirstOrDefaultAsync(e => e.EmployeeID == claim.EmployeeID);
-            if (claimEmployee == null || claimEmployee.DepartmentID != coordinator.DepartmentID)
+            if (claim.Employee.DepartmentID != user.DepartmentID)
                 return Json(new { success = false, message = "You cannot act on claims outside your department." });
 
-            if (!string.Equals(claim.Status, "Deleted", StringComparison.OrdinalIgnoreCase))
+            if (claim.Status.Equals("verified", StringComparison.OrdinalIgnoreCase))
+                return Json(new { success = false, message = "Verified claims cannot be rejected." });
+
+            if (claim.Status.Equals("Approved", StringComparison.OrdinalIgnoreCase))
+                return Json(new { success = false, message = "Approved claims cannot be rejected." });
+
+            if (claim.Status.Equals("Deleted", StringComparison.OrdinalIgnoreCase))
+                return Json(new { success = false, message = "Deleted claims cannot be rejected." });
+
+            // PASS — reject the claim
+            claim.Status = "Rejected";
+            _db.Claims.Update(claim);
+
+            var remarks = string.IsNullOrWhiteSpace(comment) ? null : comment;
+
+            _db.Verifications.Add(new Verification
             {
-                claim.Status = "Rejected";
+                ClaimID = claim.ClaimID,
+                VerifiedBy = user.EmployeeID,
+                VerificationDate = DateTime.UtcNow,
+                Status = "Rejected",
+                Remarks = remarks
+            });
 
-                // Optional comment
-                string? remarks = !string.IsNullOrWhiteSpace(comment) ? comment : null;
-                claim.GetType().GetProperty("CoordinatorComment")?.SetValue(claim, remarks);
+            await _db.SaveChangesAsync();
 
-                _db.Claims.Update(claim);
-
-                // Add verification record
-                var verification = new Verification
-                {
-                    ClaimID = claim.ClaimID,
-                    VerifiedBy = coordinator.EmployeeID,
-                    VerificationDate = DateTime.UtcNow,
-                    Status = "Rejected",
-                    Remarks = remarks
-                };
-                _db.Verifications.Add(verification);
-
-                await _db.SaveChangesAsync();
-
-                return Json(new { success = true, message = "Claim rejected." });
-            }
-
-            else
-            {
-                return BadRequest(new { success = false, message = "Deleted claims cannot be rejected." });
-            }
+            return Json(new { success = true, message = "Claim rejected." });
         }
+
 
         // Small helper: redirect to the application's download endpoint
         public IActionResult Download(int documentId)

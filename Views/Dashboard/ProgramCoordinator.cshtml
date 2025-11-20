@@ -145,25 +145,60 @@
                                             }
                                         </td>
 
+                                        @{
+                                            // Normalize status safely
+                                            var status = (c?.Status ?? "").Trim();
+                                            var statusLower = status.ToLowerInvariant();
+
+                                            bool isDeleted = statusLower == "deleted";
+                                            bool isApproved = statusLower == "approved";
+                                            bool isVerified = statusLower == "Verified";
+                                            bool isPending = statusLower == "pending";
+                                            bool isPendingApproval = statusLower == "pendingapproval" || statusLower == "pending_approval"; // tolerate variants
+
+                                            // allow action only for Pending or PendingApproval, and when not deleted/approved/verified
+                                            bool canAct = !isDeleted && !isApproved && !isVerified && (isPending || isPendingApproval);
+
+                                            // attributes for disabled state and tooltip
+                                            string disabledAttr = canAct ? "" : "disabled";
+                                            string ariaDisabled = canAct ? "false" : "true";
+                                            string tooltip = isDeleted ? "Deleted claims cannot be acted on."
+                                            : isApproved ? "Approved claims cannot be acted on."
+                                            : isVerified ? "Verified claims cannot be acted on."
+                                            : "No actions available for this claim.";
+                                        }
+
                                         <td>
-                                            @if (!c.IsDeleted && c.Status != "Approved" && (c.Status == "Pending" || c.Status == "PendingApproval"))
-                                            {
-                                                <form asp-action="VerifyClaim" method="post" class="d-inline">
-                                                    @Html.AntiForgeryToken()
-                                                    <input type="hidden" name="claimId" value="@c.ClaimID" />
-                                                    <button class="btn btn-success btn-sm">Verify</button>
-                                                </form>
-                                                <form asp-action="RejectClaim" method="post" class="d-inline ms-1">
-                                                    @Html.AntiForgeryToken()
-                                                    <input type="hidden" name="claimId" value="@c.ClaimID" />
-                                                    <button class="btn btn-danger btn-sm">Reject</button>
-                                                </form>
-                                            }
-                                            else
-                                            {
-                                                <span class="text-muted">No actions</span>
-                                            }
+                                            <!-- Verify form (always present) -->
+                                            <form asp-action="VerifyClaim" method="post" class="d-inline">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="claimId" value="@c.ClaimID" />
+                                                <button type="submit"
+                                                        class="btn btn-success btn-sm"
+                                                        @Html.Raw(disabledAttr)
+                                                        aria-disabled="@ariaDisabled"
+                                                        title="@tooltip"
+                                                        style="cursor:@(canAct ? "pointer" : "not-allowed");">
+                                                    Verify
+                                                </button>
+                                            </form>
+
+                                            <!-- Reject form (always present) -->
+                                            <form asp-action="RejectClaim" method="post" class="d-inline ms-1">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="claimId" value="@c.ClaimID" />
+                                                <button type="submit"
+                                                        class="btn btn-danger btn-sm"
+                                                        @Html.Raw(disabledAttr)
+                                                        aria-disabled="@ariaDisabled"
+                                                        title="@tooltip"
+                                                        style="cursor:@(canAct ? "pointer" : "not-allowed");">
+                                                    Reject
+                                                </button>
+                                            </form>
                                         </td>
+
+
                                     </tr>
                                 }
                             </tbody>

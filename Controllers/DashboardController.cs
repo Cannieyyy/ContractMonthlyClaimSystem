@@ -170,7 +170,9 @@ namespace ContractMonthlyClaimSystem.Controllers
             // Important: include SupportingDocuments
             var claims = await _db.Claims
                 .Where(c => c.EmployeeID == empId.Value)
-                .Include(c => c.SupportingDocuments)    // <--- this ensures docs appear
+                .Include(c => c.SupportingDocuments)
+                .Include(c => c.Verifications)   // Coordinator remarks
+                .Include(c => c.Approvals)
                 .OrderByDescending(c => c.DateCreated)
                 .AsNoTracking()
                 .ToListAsync();
@@ -364,22 +366,31 @@ namespace ContractMonthlyClaimSystem.Controllers
         [HttpGet]
         public async Task<IActionResult> EditClaim(int id)
         {
+            // Get the current logged-in employee
             var empId = HttpContext.Session.GetInt32("EmployeeID");
             if (empId == null) return RedirectToAction("Login_Register", "Home");
 
-            var claim = await _db.Claims.AsNoTracking().FirstOrDefaultAsync(c => c.ClaimID == id && c.EmployeeID == empId.Value);
+            // Fetch the claim for this employee
+            var claim = await _db.Claims
+                .AsNoTracking()
+                .FirstOrDefaultAsync(c => c.ClaimID == id && c.EmployeeID == empId.Value);
+
             if (claim == null) return NotFound();
 
+            // Map claim to ViewModel for modal
             var vm = new ClaimEditViewModel
             {
                 ClaimID = claim.ClaimID,
                 HoursWorked = claim.HoursWorked,
-                WorkMonth = claim.ClaimDate.ToString("yyyy-MM")
+                WorkMonth = claim.ClaimDate.ToString("yyyy-MM"),
+                // optional: include Status if you want to show it in the modal
+                Status = claim.Status
             };
 
-            // Return JSON for modal population, or you can return PartialView — we'll use JSON
+            // Return JSON for modal population
             return Json(vm);
         }
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -388,11 +399,40 @@ namespace ContractMonthlyClaimSystem.Controllers
             var empId = HttpContext.Session.GetInt32("EmployeeID");
             if (empId == null) return RedirectToAction("Login_Register", "Home");
 
-            if (!ModelState.IsValid)
+            // Manual decimal parse because culture breaks ModelState
+            if (!decimal.TryParse(model.HoursWorked.ToString(),
+                System.Globalization.NumberStyles.Any,
+                System.Globalization.CultureInfo.InvariantCulture,
+                out var hours))
             {
-                TempData["ClaimError"] = "Invalid input.";
+                TempData["ClaimError"] = "Hours Worked must be a valid number.";
                 return RedirectToAction("Lecture");
             }
+
+            model.HoursWorked = hours;
+
+            // ----- VALIDATE HOURS -----
+            if (model.HoursWorked < 1)
+            {
+                TempData["ClaimError"] = "Hours Worked must be greater than 0.";
+                return RedirectToAction("Lecture");
+            }
+
+            if (model.HoursWorked > 140)
+            {
+                TempData["ClaimError"] = "Hours Worked cannot exceed 140 hours.";
+                return RedirectToAction("Lecture");
+            }
+
+
+            // Validate month format manually
+            if (string.IsNullOrWhiteSpace(model.WorkMonth) ||
+                !DateTime.TryParse(model.WorkMonth + "-01", out var parsedMonth))
+            {
+                TempData["ClaimError"] = "Please select a valid month.";
+                return RedirectToAction("Lecture");
+            }
+
 
             // Load claim with supporting docs
             var claim = await _db.Claims
@@ -430,6 +470,8 @@ namespace ContractMonthlyClaimSystem.Controllers
             claim.HoursWorked = model.HoursWorked;
             claim.ClaimDate = claimDate;
             claim.TotalAmount = Math.Round(model.HoursWorked * dept.HourlyRate, 2);
+            claim.Status = "Pending";
+
 
             // If a new file is uploaded, validate and replace
             if (NewSupportingDoc != null && NewSupportingDoc.Length > 0)

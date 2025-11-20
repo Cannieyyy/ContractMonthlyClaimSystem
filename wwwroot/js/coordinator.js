@@ -279,3 +279,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
     console.log(loadClaimsDebug());
 });
+
+
+document.addEventListener('DOMContentLoaded', function () {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
+    tooltipTriggerList.forEach(function (el) {
+        // only initialize for elements that are disabled UI explanations
+        if (el.disabled) {
+            new bootstrap.Tooltip(el);
+        }
+    });
+});
