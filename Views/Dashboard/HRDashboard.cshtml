@@ -3,6 +3,79 @@
     ViewData["Title"] = "HR Dashboard";
 }
 
+@section Scripts {
+    <script src="~/js/hr.js"></script>
+}
+
+<style>
+    .modal-content {
+        transform: translateY(-20px);
+        transition: transform 0.2s ease, opacity 0.2s ease;
+    }
+
+    .modal.show .modal-content {
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+    .toast-card {
+        display: flex;
+        align-items: center;
+        padding: 0.75rem 1rem;
+        min-width: 250px;
+        max-width: 350px;
+        border-radius: 0.5rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        color: #fff;
+        font-size: 0.95rem;
+        opacity: 0;
+        transform: translateX(100%);
+        transition: all 0.4s ease;
+    }
+
+        .toast-card.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .toast-card i {
+            margin-right: 0.75rem;
+            font-size: 1.25rem;
+        }
+
+        .toast-card.info {
+            background-color: #0dcaf0;
+            color: #000;
+        }
+        /* info/teal */
+        .toast-card.success {
+            background-color: #198754;
+        }
+        /* success/green */
+        .toast-card.warning {
+            background-color: #ffc107;
+            color: #000;
+        }
+        /* warning/yellow */
+        .toast-card.danger {
+            background-color: #dc3545;
+        }
+        /* danger/red */
+
+        .toast-card .toast-message {
+            flex: 1;
+        }
+
+        .toast-card .toast-close {
+            background: transparent;
+            border: none;
+            color: inherit;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+</style>
+
 <div class="container-fluid py-4">
 
     <!-- Header -->
@@ -98,41 +171,252 @@
         </div>
     </div>
 
-    <!-- Employees -->
-    <div class="card bg-dark text-light mt-4">
-        <div class="card-body">
-            <h4 class="text-info mb-3">Employees Overview</h4>
+    
+</div>
 
-            <div class="table-responsive">
-                <table class="table table-dark table-hover align-middle">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Department</th>
-                            <th>Role</th>
-                            <th>Date Created</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var e in Model.Employees)
-                        {
-                            <tr>
-                                <td>@e.Name</td>
-                                <td>@e.Email</td>
-                                <td>@e.Department?.Name</td>
-                                <td>@e.Role</td>
-                                <td>@e.DateCreated.ToString("yyyy-MM-dd")</td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
+<div class="row g-4 mb-4 text-center">
 
+    <!-- Employee Overview -->
+    <div class="col-md-4">
+        <div class="card feature-card text-center p-4 employee-overview-btn" style="cursor: pointer;">
+            <i class="bi bi-people-fill display-5 feature-icon text-info"></i>
+            <h5 class="card-title mt-3">Employee Overview</h5>
+            <p class="card-text">View and manage employee information.</p>
         </div>
     </div>
 
+    <!-- Employees -->
+    <div id="employeeOverviewSection" class="collapse mt-3">
+
+        <div class="card bg-dark text-light mt-4">
+            <div class="card-body">
+                <h4 class="text-info mb-3">Employees Overview</h4>
+
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Department</th>
+                                <th>Role</th>
+                                <th>Date Created</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var e in Model.Employees)
+                            {
+                                <tr>
+                                    <td>@e.Name</td>
+                                    <td>@e.Email</td>
+                                    <td>@e.Department?.Name</td>
+                                    <td>@e.Role</td>
+                                    <td>@e.DateCreated.ToString("yyyy-MM-dd")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="text-end mt-3">
+                    <button class="btn btn-outline-light close-section">Close</button>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Reports -->
+    <div class="col-md-4">
+        <div class="card feature-card text-center p-4 reports-btn" style="cursor: pointer;">
+            <i class="bi bi-bar-chart-fill display-5 feature-icon text-warning"></i>
+            <h5 class="card-title mt-3">Reports</h5>
+            <p class="card-text">Generate claim and verification reports.</p>
+        </div>
+    </div>
+
+    <!-- Reports Section -->
+    <div id="reportsSection" class="collapse mt-3">
+
+        <div class="card bg-dark text-light mt-4">
+            <div class="card-body">
+                <h4 class="text-warning mb-3">Claims Reports</h4>
+
+                <!-- Filters (same style as Claims) -->
+                <div class="row g-3 mb-3">
+
+                    <div class="col-md-3">
+                        <label class="form-label text-light">Lecturer</label>
+                        <input id="reportFilterLecturer" class="form-control" placeholder="Search..." />
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label text-light">Department</label>
+                        <select id="reportFilterDepartment" class="form-select">
+                            <option value="">All Departments</option>
+                            @foreach (var d in Model.Departments)
+                            {
+                                <option value="@d.DepartmentID">@d.Name</option>
+                            }
+                        </select>
+                    </div>
+
+                    
+
+                    <div class="col-md-3">
+                        <label class="form-label text-light">From Month</label>
+                        <select id="reportFilterMonthFrom" class="form-select">
+                            <option value="">All</option>
+                            @for (int i = 1; i <= 12; i++)
+                            {
+                                <option value="@i">@System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(i)</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label text-light">To Month</label>
+                        <select id="reportFilterMonthTo" class="form-select">
+                            <option value="">All</option>
+                            @for (int i = 1; i <= 12; i++)
+                            {
+                                <option value="@i">@System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(i)</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="col-md-3 d-flex align-items-end">
+                        <button id="btnReportSearch" class="btn btn-warning me-2">Generate</button>
+                        <button id="btnReportReset" class="btn btn-outline-light">Reset</button>
+                    </div>
+
+
+                </div>
+
+                <!-- Report Table -->
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>Department</th>
+                                <th>Lecturer</th>
+                                <th>Month</th>
+                                <th>Total Hours</th>
+                                <th>Total Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reportsTable">
+                            <tr>
+                                <td colspan="5" class="text-center text-muted">Use filters to generate report</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="text-end mt-3">
+                    <button class="btn btn-outline-light close-section">Close</button>
+                </div>
+
+            </div>
+        </div>
+
+
+    </div>
+
+
+    <!-- Manage Accounts -->
+    <div class="col-md-4">
+        <div class="card feature-card text-center p-4 manage-accounts-btn" style="cursor: pointer;">
+            <i class="bi bi-person-gear display-5 feature-icon text-success"></i>
+            <h5 class="card-title mt-3">Manage User Accounts</h5>
+            <p class="card-text">Edit roles, departments, and access.</p>
+        </div>
+    </div>
+
+    <!-- Manage Accounts Section (Dark Theme Styled) -->
+    <div id="manageAccountsSection" class="container mt-4" style="display:none;">
+        <div class="card bg-dark text-light shadow">
+            <div class="card-header bg-dark text-light d-flex justify-content-between align-items-center  ">
+                <h5 class="text-info m-0">Manage User Accounts</h5>
+                <button class="btn btn-sm btn-outline-light close-section">Close</button>
+            </div>
+
+            <div class="card-body">
+
+                <table class="table table-dark table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th class="text-info">Name</th>
+                            <th class="text-info">Department</th>
+                            <th class="text-info">Role</th>
+                            <th class="text-info">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+@foreach (var emp in Model.Employees)
+{
+   <tr data-employee-id="@emp.EmployeeID">
+
+    <td>@emp.Name</td>
+
+    <td>
+        
+            
+            
+                                            <select class="form-select department-select">
+                                                @foreach (var d in Model.Departments)
+                                                {
+                                                    <option value="@d.DepartmentID"
+                                                            selected="@(emp.DepartmentID == d.DepartmentID)">
+                                                        @d.Name
+                                                    </option>
+                                                }
+                                            </select>
+
+            
+       
+    </td>
+
+    <td>
+        <select class="form-select bg-dark text-light role-select">
+            <option value="Lecturer" selected="@(emp.Role == "Lecturer")">Lecturer</option>
+            <option value="Coordinator" selected="@(emp.Role == "Coordinator")">Coordinator</option>
+            <option value="Manager" selected="@(emp.Role == "Manager")">Manager</option>
+            <option value="HR Admin" selected="@(emp.Role == "HR Admin")">HR Admin</option>
+        </select>
+    </td>
+
+    <td>
+        @if (emp.IsActive)
+        {
+            <button class="btn btn-info status-toggle text-dark fw-bold">Activated</button>
+        }
+        else
+        {
+            <button class="btn btn-outline-info status-toggle fw-bold">Deactivated</button>
+        }
+    </td>
+
+</tr>
+
+}
+</tbody>
+
+                </table>
+            </div>
+        </div>
+    </div>
+
+   
+
 </div>
+
+
+
+ 
+
+
 
 <!-- Invoice Modal -->
 <div class="modal fade" id="invoiceModal" tabindex="-1">
@@ -152,4 +436,4 @@
     </div>
 </div>
 
-<script src="~/js/hr.js"></script>
+

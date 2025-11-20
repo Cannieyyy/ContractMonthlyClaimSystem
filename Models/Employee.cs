@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ContractMonthlyClaimSystem.Models
 {
@@ -32,5 +33,8 @@ namespace ContractMonthlyClaimSystem.Models
         public virtual ICollection<Claim>? Claims { get; set; }
         public virtual ICollection<Verification>? Verifications { get; set; }
         public virtual UserAccount? UserAccount { get; set; }
+        [NotMapped]
+        public bool IsActive { get; set; }
+
     }
 }

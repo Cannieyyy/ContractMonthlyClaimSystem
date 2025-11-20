@@ -1,11 +1,12 @@
-﻿using System.IO.Compression;
+﻿using System.Globalization;
+using System.IO.Compression;
 using ContractMonthlyClaimSystem.Data;
 using ContractMonthlyClaimSystem.Models;
 using iTextSharp.text;
 using iTextSharp.text.pdf;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Globalization;
+using SkiaSharp;
 
 
 
@@ -22,13 +23,44 @@ namespace ContractMonthlyClaimSystem.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var model = new HRDashboardViewModel
+
+            var empId = HttpContext.Session.GetInt32("EmployeeID");
+            if (empId == null)
+                return RedirectToAction("Login_Register", "Home");
+
+            // Check if logged user is HR Admin
+            var employee = await _db.Employees
+                .AsNoTracking()
+                .FirstOrDefaultAsync(e => e.EmployeeID == empId.Value);
+
+            if (employee == null || employee.Role != "HR Admin")
+                return RedirectToAction("Login_Register", "Home");
+
+            // Load employees + departments
+            var employees = await _db.Employees
+                .Include(e => e.Department)
+                .AsNoTracking()
+                .ToListAsync();
+
+            // Load the user accounts (where IsActive lives)
+            var accounts = await _db.UserAccounts
+                .AsNoTracking()
+                .ToListAsync();
+
+            // Attach activation status to each employee
+            foreach (var emp in employees)
             {
-                Departments = await _db.Departments.ToListAsync(),
-                Employees = await _db.Employees.Include(e => e.Department).ToListAsync()
+                var acc = accounts.FirstOrDefault(a => a.EmployeeID == emp.EmployeeID);
+                emp.IsActive = acc?.IsActive ?? false;
+            }
+
+            var vm = new HRDashboardViewModel
+            {
+                Departments = await _db.Departments.AsNoTracking().ToListAsync(),
+                Employees = employees
             };
 
-            return View(model);
+            return View("HRDashboard", vm);
         }
 
 
@@ -285,11 +317,54 @@ namespace ContractMonthlyClaimSystem.Controllers
 
 
 
+        public async Task<IActionResult> GetReports(int? departmentId, string? lecturer, int? monthFrom, int? monthTo)
+        {
+            try
+            {
+                var query = _db.Claims
+                    .Include(c => c.Employee)
+                    .ThenInclude(e => e.Department)
+                    .AsNoTracking()
+                    .AsQueryable();
 
+                if (departmentId.HasValue && departmentId.Value > 0)
+                    query = query.Where(c => c.Employee.DepartmentID == departmentId.Value);
 
+                if (!string.IsNullOrWhiteSpace(lecturer))
+                    query = query.Where(c => EF.Functions.Like(c.Employee.Name, $"%{lecturer}%"));
 
+                // Month range filter
+                if (monthFrom.HasValue && monthTo.HasValue)
+                    query = query.Where(c => c.ClaimDate.Month >= monthFrom.Value && c.ClaimDate.Month <= monthTo.Value);
+                else if (monthFrom.HasValue)
+                    query = query.Where(c => c.ClaimDate.Month >= monthFrom.Value);
+                else if (monthTo.HasValue)
+                    query = query.Where(c => c.ClaimDate.Month <= monthTo.Value);
 
+                var reports = await query
+                    .GroupBy(c => new
+                    {
+                        DepartmentName = c.Employee.Department.Name,
+                        LecturerName = c.Employee.Name,
+                        Month = c.ClaimDate.Month
+                    })
+                    .Select(g => new
+                    {
+                        Department = g.Key.DepartmentName,
+                        Lecturer = g.Key.LecturerName,
+                        Month = System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(g.Key.Month),
+                        TotalHours = g.Sum(c => c.HoursWorked),
+                        TotalAmount = g.Sum(c => c.TotalAmount)
+                    })
+                    .ToListAsync();
 
+                return Json(new { success = true, data = reports });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
 
         [HttpGet]
         public async Task<IActionResult> ExportBatchPDF(int? departmentId, string? status, int? month, string? lecturer)
@@ -336,6 +411,42 @@ namespace ContractMonthlyClaimSystem.Controllers
             }
         }
 
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateDepartment(int employeeId, int departmentId)
+        {
+            var emp = await _db.Employees.FirstOrDefaultAsync(e => e.EmployeeID == employeeId);
+            if (emp == null) return NotFound();
+
+            emp.DepartmentID = departmentId;
+            await _db.SaveChangesAsync();
+
+            return Json(new { success = true });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateRole(int employeeId, string role)
+        {
+            var emp = await _db.Employees.FirstOrDefaultAsync(e => e.EmployeeID == employeeId);
+            if (emp == null) return NotFound();
+
+            emp.Role = role;
+            await _db.SaveChangesAsync();
+
+            return Json(new { success = true });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateStatus(int employeeId, bool isActive)
+        {
+            var acc = await _db.UserAccounts.FirstOrDefaultAsync(a => a.EmployeeID == employeeId);
+            if (acc == null) return NotFound();
+
+            acc.IsActive = isActive;
+            await _db.SaveChangesAsync();
+
+            return Json(new { success = true });
+        }
 
 
     }

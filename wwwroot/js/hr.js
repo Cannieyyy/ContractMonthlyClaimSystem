@@ -212,3 +212,371 @@ document.addEventListener('DOMContentLoaded', function () {
     `;
 
 });
+
+
+document.addEventListener("DOMContentLoaded", () => {
+    console.log("HR JS Loaded");
+
+    const empBtn = document.querySelector(".employee-overview-btn");
+    const accBtn = document.querySelector(".manage-users-card");
+
+    const empSec = document.getElementById("employeeOverviewSection");
+    const accSec = document.getElementById("manageAccountsSection");
+
+    function closeAll() {
+        if (empSec) empSec.classList.remove("show");
+        if (accSec) accSec.classList.remove("show");
+    }
+
+    if (empBtn) {
+        empBtn.addEventListener("click", () => {
+            console.log("Employee Overview CLICKED");
+            closeAll();
+            empSec.classList.add("show");
+        });
+    }
+
+    
+
+    if (accBtn) {
+        accBtn.addEventListener("click", () => {
+            console.log("Manage Users CLICKED");
+            closeAll();
+            accSec.classList.add("show");
+        });
+    }
+
+    document.querySelectorAll(".close-section").forEach(btn => {
+        btn.addEventListener("click", () => {
+            closeAll();
+            console.log("Section closed");
+        });
+    });
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+    const repBtn = document.querySelector('.reports-btn');
+    const reportsSection = document.getElementById('reportsSection');
+    const tableBody = document.getElementById('reportsTable');
+    const btnSearch = document.getElementById('btnReportSearch');
+    const btnReset = document.getElementById('btnReportReset');
+
+    if (repBtn && reportsSection) {
+        repBtn.addEventListener('click', () => {
+            // Toggle display instead of class
+            if (reportsSection.style.display === 'none' || !reportsSection.style.display) {
+                reportsSection.style.display = 'block';
+            } else {
+                reportsSection.style.display = 'none';
+            }
+        });
+    }
+
+    // Close button
+    reportsSection.querySelectorAll('.close-section').forEach(btn =>
+        btn.addEventListener('click', () => reportsSection.style.display = 'none')
+    );
+
+    async function loadReports() {
+        if (!tableBody) return;
+
+        const dept = document.getElementById('reportFilterDepartment')?.value || null;
+        const lecturer = document.getElementById('reportFilterLecturer')?.value || null;
+        const monthFrom = document.getElementById('reportFilterMonthFrom')?.value || null;
+        const monthTo = document.getElementById('reportFilterMonthTo')?.value || null;
+
+        
+
+
+        tableBody.innerHTML = `<tr><td colspan="5" class="text-center text-muted">Loading...</td></tr>`;
+
+        try {
+            // Build query string with only values that exist
+            const params = new URLSearchParams();
+            if (dept) params.append('departmentId', dept);
+            if (lecturer) params.append('lecturer', lecturer);
+            if (monthFrom) params.append('monthFrom', monthFrom);
+            if (monthTo) params.append('monthTo', monthTo);
+
+            const res = await fetch('/HR/GetReports?' + params.toString());
+            const payload = await res.json();
+
+            if (!payload.success || !payload.data || payload.data.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="5" class="text-center text-muted">No data found.</td></tr>`;
+                return;
+            } else {
+
+                let totalHours = 0;
+                let totalAmount = 0;
+
+                // Build table rows and sum totals
+                const rowsHtml = payload.data.map(r => {
+                    totalHours += Number(r.totalHours ?? 0);
+                    totalAmount += Number(r.totalAmount ?? 0);
+                    return `
+        <tr>
+            <td>${r.department ?? ''}</td>
+            <td>${r.lecturer ?? ''}</td>
+            <td>${r.month ?? ''}</td>
+            <td>${r.totalHours ?? 0}</td>
+            <td>${(r.totalAmount ?? 0).toLocaleString('en-ZA', { style: 'currency', currency: 'ZAR' })}</td>
+        </tr>
+    `;
+                }).join('');
+
+                // Add subtotal row
+                const subtotalRow = `
+    <tr class="table-secondary fw-bold">
+        <td colspan="3" class="text-end">Subtotal:</td>
+        <td>${totalHours}</td>
+        <td>${totalAmount.toLocaleString('en-ZA', { style: 'currency', currency: 'ZAR' })}</td>
+    </tr>
+`;
+
+                // Output the final table
+                tableBody.innerHTML = rowsHtml + subtotalRow;
+
+            }
+
+        } catch (err) {
+            console.error(err);
+            tableBody.innerHTML = `<tr><td colspan="5" class="text-center text-danger">Error loading data</td></tr>`;
+        }
+    }
+
+    if (btnSearch) btnSearch.addEventListener('click', loadReports);
+
+    if (btnReset) btnReset.addEventListener('click', () => {
+        document.getElementById('reportFilterDepartment').value = "";
+        document.getElementById('reportFilterLecturer').value = "";
+        document.getElementById('reportFilterMonth').value = "";
+        tableBody.innerHTML = `<tr><td colspan="5" class="text-center text-muted">Use filters to generate report</td></tr>`;
+    });
+});
+
+
+document.addEventListener('DOMContentLoaded', () => {
+
+    // Close Section
+    document.querySelectorAll('.close-section').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.getElementById('manageAccountsSection').classList.remove('show');
+        });
+    });
+
+    
+    });
+
+    
+
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    const manageBtn = document.querySelector(".manage-accounts-btn");
+    const manageSec = document.getElementById("manageAccountsSection");
+
+    function closeAll() {
+        manageSec.style.display = "none";
+    }
+
+    // Show section when button is clicked
+    if (manageBtn) {
+        manageBtn.addEventListener("click", () => {
+            manageSec.style.display = "block";
+        });
+    }
+
+    // Close button
+    manageSec.querySelectorAll(".close-section").forEach(btn => {
+        btn.addEventListener("click", () => {
+            closeAll();
+        });
+    });
+
+    
+
+});
+
+// Department change
+document.querySelectorAll('#manageAccountsSection select.department-select')
+    .forEach(sel => {
+        sel.addEventListener('change', async function () {
+            const row = this.closest('tr');
+            const employeeId = row.getAttribute('data-employee-id');
+            const departmentId = this.value;
+
+            const proceed = await confirmChange("Are you sure you want to change the department?", "danger");
+            if (!proceed) return;
+
+            await fetch('/HR/UpdateDepartment', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `employeeId=${employeeId}&departmentId=${departmentId}`
+            });
+
+            showToast('Department updated successfully!', 'success');
+        });
+    });
+
+// Role change
+document.querySelectorAll('#manageAccountsSection select.role-select')
+    .forEach(sel => {
+        sel.addEventListener('change', async function () {
+            const row = this.closest('tr');
+            const employeeId = row.getAttribute('data-employee-id');
+            const role = this.value;
+
+            const proceed = await confirmChange("Are you sure you want to change the role?", "danger");
+            if (!proceed) return;
+
+            await fetch('/HR/UpdateRole', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `employeeId=${employeeId}&role=${role}`
+            });
+
+            showToast('Role updated successfully!', 'success');
+        });
+    });
+
+// Status toggle
+document.querySelectorAll('#manageAccountsSection .status-toggle')
+    .forEach(btn => {
+        btn.addEventListener('click', async function () {
+            const row = this.closest('tr');
+            const employeeId = row.getAttribute('data-employee-id');
+
+            const currentActive = this.classList.contains('btn-info');
+            const newState = !currentActive;
+
+            const proceed = await confirmChange(`Are you sure you want to ${newState ? 'activate' : 'deactivate'} this user?`, "danger");
+            if (!proceed) return;
+
+            await fetch('/HR/UpdateStatus', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `employeeId=${employeeId}&isActive=${newState}`
+            });
+
+            // Update UI
+            if (newState) {
+                this.classList.remove('btn-outline-info');
+                this.classList.add('btn-info', 'text-dark');
+                this.textContent = 'Activated';
+            } else {
+                this.classList.remove('btn-info', 'text-dark');
+                this.classList.add('btn-outline-info');
+                this.textContent = 'Deactivated';
+            }
+
+            showToast(`User has been ${newState ? 'activated' : 'deactivated'} successfully!`, 'success');
+        });
+    });
+
+
+// Utility function: show toast
+function showToast(message, type = 'info', duration = 3000) {
+    const toast = document.createElement('div');
+    toast.className = `toast align-items-center text-white bg-${type} border-0 show`;
+    toast.role = "alert";
+    toast.innerHTML = `
+        <div class="d-flex">
+            <div class="toast-body">
+                ${message}
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    `;
+    document.getElementById('toastContainer').appendChild(toast);
+
+    // Auto remove after duration
+    setTimeout(() => {
+        toast.classList.remove('show');
+        toast.remove();
+    }, duration);
+}
+
+async function confirmChange(message, type = 'info') {
+    return new Promise((resolve) => {
+        const modalHtml = `
+        <div class="modal fade" tabindex="-1" style="z-index:1100">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content bg-dark text-light border-${type} shadow">
+                    <div class="modal-body text-center py-4">
+                        <i class="bi ${type === 'danger' ? 'bi-exclamation-triangle-fill' : 'bi-question-circle-fill'} display-4 text-${type} mb-3"></i>
+                        <p class="fs-5">${message}</p>
+                        <div class="mt-4 d-flex justify-content-center gap-3">
+                            <button type="button" class="btn btn-outline-light btn-sm cancel-btn px-4">Cancel</button>
+                            <button type="button" class="btn btn-${type} btn-sm confirm-btn px-4">Yes</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        `;
+
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = modalHtml;
+        document.body.appendChild(tempDiv);
+        const modalEl = tempDiv.querySelector('.modal');
+        const bsModal = new bootstrap.Modal(modalEl);
+        bsModal.show();
+
+        modalEl.querySelector('.confirm-btn').addEventListener('click', () => {
+            resolve(true);
+            bsModal.hide();
+        });
+        modalEl.querySelector('.cancel-btn').addEventListener('click', () => {
+            resolve(false);
+            bsModal.hide();
+        });
+        modalEl.addEventListener('hidden.bs.modal', () => {
+            tempDiv.remove();
+        });
+    });
+}
+
+function showToast(message, type = 'info', duration = 3000) {
+    const toast = document.createElement('div');
+    toast.className = `toast-card ${type}`;
+
+    // Icon based on type
+    let icon = '';
+    switch (type) {
+        case 'success': icon = 'bi-check-circle-fill'; break;
+        case 'warning': icon = 'bi-exclamation-triangle-fill'; break;
+        case 'danger': icon = 'bi-x-circle-fill'; break;
+        default: icon = 'bi-info-circle-fill';
+    }
+
+    toast.innerHTML = `
+        <i class="bi ${icon}"></i>
+        <div class="toast-message">${message}</div>
+        <button class="toast-close">&times;</button>
+    `;
+
+    const container = document.getElementById('toastContainer');
+    container.appendChild(toast);
+
+    // Animate in
+    setTimeout(() => toast.classList.add('show'), 50);
+
+    // Close button
+    toast.querySelector('.toast-close').addEventListener('click', () => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    });
+
+    // Auto remove after duration
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, duration);
+}
+
+
+
+
+
+
+

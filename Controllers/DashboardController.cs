@@ -3,6 +3,7 @@ using ContractMonthlyClaimSystem.Data;
 using ContractMonthlyClaimSystem.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using SkiaSharp;
 
 
 
@@ -238,7 +239,7 @@ namespace ContractMonthlyClaimSystem.Controllers
             if (empId == null)
                 return RedirectToAction("Login_Register", "Home");
 
-            // (Optional) verify this user is HR
+            // Check if logged user is HR Admin
             var employee = await _db.Employees
                 .AsNoTracking()
                 .FirstOrDefaultAsync(e => e.EmployeeID == empId.Value);
@@ -246,17 +247,33 @@ namespace ContractMonthlyClaimSystem.Controllers
             if (employee == null || employee.Role != "HR Admin")
                 return RedirectToAction("Login_Register", "Home");
 
-            var model = new HRDashboardViewModel
+            // Load employees + departments
+            var employees = await _db.Employees
+                .Include(e => e.Department)
+                .AsNoTracking()
+                .ToListAsync();
+
+            // Load the user accounts (where IsActive lives)
+            var accounts = await _db.UserAccounts
+                .AsNoTracking()
+                .ToListAsync();
+
+            // Attach activation status to each employee
+            foreach (var emp in employees)
+            {
+                var acc = accounts.FirstOrDefault(a => a.EmployeeID == emp.EmployeeID);
+                emp.IsActive = acc?.IsActive ?? false; 
+            }
+
+            var vm = new HRDashboardViewModel
             {
                 Departments = await _db.Departments.AsNoTracking().ToListAsync(),
-                Employees = await _db.Employees
-                    .Include(e => e.Department)
-                    .AsNoTracking()
-                    .ToListAsync()
+                Employees = employees
             };
 
-            return View("HRDashboard", model);
+            return View("HRDashboard", vm);
         }
+
 
 
         public async Task<IActionResult> ProgramCoordinator()
