@@ -1,66 +1,194 @@
-# Time2Pay — README
+# 📘 Time2Pay – Claims Management System
+*A PROG6212 POE Project – Developed by ST10459862 (Kopano Leshope)*
 
-**Project:** ContractMonthlyClaimSystem — Time2Pay Portal
+Time2Pay is a web-based claims management system designed to streamline the submission, verification, approval, and reporting of lecturer claims.  
+The system delivers a consistent and simple user experience while enforcing strong validation, automation, and role-based access control.
 
-**Brief:** ASP.NET Core MVC app that allows lecturers to submit monthly claims (hours worked) with supporting PDF documents. Coordinators/Managers review and approve/reject claims for employees in their department.
+---
 
-## Quick start — run the project
+# 📌 Table of Contents
+- Overview  
+- Key Features  
+- User Roles & Functionalities  
+- System Improvements  
+- Automation & Validations  
+- Technology Stack  
+- Installation  
 
-1. Open the solution in Visual Studio (recommended) or run from terminal in project folder containing `ContractMonthlyClaimSystem.csproj`.
-2. Build and run the application (F5 in Visual Studio or `dotnet run` from the project folder).
-3. On first run the application will **automatically apply migrations and create the database** (this is handled by `Database.Migrate()` in `Program.cs`). You do **not** need to create the database manually.
+---
 
-> **Important:** If you previously changed models, ensure migrations are present in the `Migrations` folder. The app will apply migrations that are committed with the project. If you add model changes locally, run migrations (`dotnet ef migrations add <Name>` and `dotnet ef database update`).
+# 📖 Overview
 
-## Registering accounts
+Time2Pay provides a simple, consistent, and user-friendly interface.  
+Every dashboard uses the same layout, including:
 
-1. Open the app and go to the **Login / Register** screen.
-2. Fill in **all required fields** on the Register form. Required fields include: Full Name, Email, Department, Role, Password and Confirm Password, and the OTP when required.
-3. **Department** is critical. Departments are predefined (seeded) and include their `HourlyRate`. Example departments: *Diploma in Software Development*, *Bachelor in Information Technology*, *Higher Certificate In Networking*, *Diploma in Web Development*.
+- Clean design across all pages  
+- Feature action cards  
+- Navigation bar  
+- Quick stats showing:
+  - Submitted claims  
+  - Approved claims  
+  - Verified claims  
+  - Rejected claims  
 
-## Roles & OTP behavior
+This makes the platform easy to use because every page feels familiar and intuitive.
 
-* **Roles**: `Lecturer`, `Coordinator`, `Manager`.
-* **Privileged users** (Coordinator and Manager) require an **OTP** at registration. If the OTP is not provided (or invalid/expired), the registration will be blocked and the user's data will **not** be saved to the database — you will see the block in the console/output prompt (there is no UI message for this currently).
-* The OTP is sent to the configured email address (by default this was set to the lecturer/marker email for testing). Check that email inbox after sending the OTP request.
+---
 
-**Important workflow note**
+# ⭐ Key Features
 
-* Create accounts in this order to avoid access problems:
+### 🔹 Consistent User Interface
+- Same layout across Lecturer, Coordinator, Manager, and HR dashboards  
+- Clear navigation and feature cards  
+- Instant feedback with notifications  
 
-  1. Create at least one **Coordinator** and one **Manager** account for each Department you plan to test.
-  2. Create the **Lecturer** account(s) that belong to that Department.
+### 🔹 Automated Calculations
+- Total Amount automatically calculated using Hours Worked × Department Rate  
+- Report pages automatically compute totals  
+- Invoices automatically generated using filters  
 
-If you create a lecturer in a department but no Coordinator/Manager exists for that department, the lecturer’s claims cannot be approved by anyone in that department (since approval is department-scoped).
+### 🔹 Strong Validations
+- Hours worked must be between **1 and 140**  
+- Approved claims **cannot** be edited or deleted  
+- Coordinators cannot reject verified/approved claims  
+- Managers cannot reject approved claims  
+- Editing a rejected claim resets status to **Pending**  
 
-## Claim submission rules
+### 🔹 Role-Based Access
+- Each user sees claims only from **their assigned department**  
+- HR has full system access  
 
-* Lecturers **must** upload a supporting PDF document when submitting a claim. The server enforces:
+---
 
-  * File must be a **PDF** (extension `.pdf`).
-  * Maximum file size **5 MB**.
-  * If no file is supplied, the submission is rejected.
-* Claims include: Hours Worked (decimal), Month (YYYY-MM), and the uploaded PDF.
-* `TotalAmount` is calculated automatically as `HoursWorked * Department.HourlyRate` and stored in the `Claims` table.
+# 🧑‍🏫 User Roles & Functionalities
 
-## Coordinator / Manager responsibilities
+---
 
-* Coordinators and Managers see only claims associated with lecturers in **their department**.
-* They can **Approve** or **Reject** claims. Rejection/approval sets the claim `Status` accordingly and can optionally include a comment (if implemented/seeded in your database schema).
+## 👨‍🏫 Lecturer Dashboard
 
-## File storage
+### ✔ Claim Submission
+- Submit monthly hours worked  
+- Auto-calculation of total amount  
+- Validation:
+  - Cannot submit 0 or negative hours  
+  - Cannot submit more than 140 hours  
+  - Clear error messages
 
-* Uploaded documents are stored under `wwwroot/uploads/` and referenced in the `SupportingDocuments` table via a relative path (e.g. `uploads/abcd.pdf`).
-* Downloading a document streams it back from disk via the `Dashboard/DownloadDocument/{id}` action.
+### ✔ Claim Management
+- Edit claims in **Pending** or **Verified** state  
+- Approved claims are locked  
+- Editing a rejected claim changes status to **Pending**
 
-## Troubleshooting & common commands
+### ✔ Rejected Claim Comments
+- Button shows the reason the claim was rejected  
 
-* Migrations: `dotnet ef migrations add <Name>` and `dotnet ef database update` (only needed if you change models locally).
-* If you see the `PendingModelChangesWarning` on startup: create a migration reflecting the model changes, then update the DB.
-* If uploads fail: confirm `wwwroot/uploads` exists and the app has write permissions.
-* If download returns 404: check the `SupportingDocuments.FilePath` value and that the physical file exists under `wwwroot/uploads`.
+---
 
-## Notes for marker / lecturer
+## 🧑‍💼 Coordinator Dashboard
 
-* To test OTP behavior, request an OTP when registering a Coordinator/Manager and check the designated email inbox used in the project.
-* The app includes automatic DB creation when migrations are present. If your lecturer plans to run the project, ensure the `Migrations` folder is included so the DB builds automatically.
+### ✔ Department-Only Access
+- Can only see claims from lecturers in **their assigned department**
+
+### ✔ Verification
+- Can verify or reject claims  
+- Cannot reject:
+  - Verified claims  
+  - Approved claims
+
+### ✔ Reporting
+- View approved claims for their department  
+- Totals automatically calculated  
+
+---
+
+## 👨‍💼 Manager Dashboard
+
+### ✔ Department-Only Access
+- Can only see claims from **their department**
+
+### ✔ Approval
+- Can approve or reject claims  
+- Cannot reject approved claims  
+
+### ✔ Reporting
+- Full report of approved claims  
+- Automatically calculated totals  
+
+---
+
+## 🧑‍💼💼 HR Admin Dashboard (Top-Level Access)
+
+### ✔ Monthly Invoice Generation
+- Filter by department, lecturer, or month  
+- Generate:
+  - Single lecturer invoice  
+  - Department batch invoice  
+  - Full institution invoice  
+- Export invoices as **PDF** (single or batch)
+
+### ✔ Reports
+- Generate reports using filters  
+- System automatically calculates totals  
+
+### ✔ User Account Management
+- Change an employee’s department  
+- Change employee roles  
+- Activate or deactivate user accounts  
+
+---
+
+# 🔧 System Improvements
+
+### Registration & Login
+- Added successful login notifications  
+- Added failure messages  
+- Improved user feedback on registration
+
+### Lecturer View
+- Validation added for hours worked (1–140)  
+- Prevents invalid claim submissions  
+- Rejected claims show comment  
+- Editing rejected claims resets status to **Pending**
+
+### Coordinator & Manager
+- Dynamic quick stats  
+- Validations prevent rejecting verified/approved claims  
+- Improved workflow consistency
+
+### HR Admin
+- Added invoice generator  
+- Added batch PDF export  
+- Added user account management panel  
+
+---
+
+# 🤖 Automation & Validations
+
+The system automatically:
+
+- Calculates claim totals  
+- Prevents editing or deleting approved claims  
+- Prevents rejecting verified or approved claims  
+- Resets rejected claims to pending when edited  
+- Filters claims based on user role  
+- Generates PDF invoices  
+- Calculates totals for reports  
+
+---
+
+# 🛠 Technology Stack
+
+- ASP.NET Core MVC  
+- C# / Entity Framework Core  
+- SQL Server  
+- JavaScript / Bootstrap 5  
+- HTML / CSS  
+- PDF Generation Library  
+
+---
+
+# 📦 Installation
+
+### 1. Clone the repository
+```bash
+git clone https://github.com/your-repo/time2pay.git
