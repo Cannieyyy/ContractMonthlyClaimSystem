@@ -288,11 +288,11 @@ namespace ContractMonthlyClaimSystem.Controllers
             if (employee == null) return RedirectToAction("Login_Register", "Home");
 
             var claims = await _db.Claims
-    .Include(c => c.Employee) // needed for department
-    .Include(c => c.SupportingDocuments)
-    .Where(c => c.Employee.DepartmentID == employee.DepartmentID)
-    .OrderByDescending(c => c.DateCreated)
-    .AsNoTracking()
+              .Include(c => c.Employee) // needed for department
+              .Include(c => c.SupportingDocuments)
+              .Where(c => c.Employee.DepartmentID == employee.DepartmentID)
+              .OrderByDescending(c => c.DateCreated)
+                .AsNoTracking()
     .ToListAsync();
 
             var vm = new CoordinatorDashboardViewModel
