@@ -64,7 +64,7 @@
             <div class="card feature-card text-center p-4 approve-claims-card" style="cursor: pointer;">
                 <i class="bi bi-folder-check display-5 feature-icon"></i>
                 <h5 class="card-title mt-3">Approve Claims</h5>
-                <p class="card-text">Approve claims submitted by coordinators.</p>
+                <p class="card-text">Approve claims.</p>
             </div>
         </div>
 
@@ -179,7 +179,7 @@
             <div class="card feature-card text-center p-4">
                 <i class="bi bi-people display-5 feature-icon"></i>
                 <h5 class="card-title mt-3">Manage Coordinators</h5>
-                <p class="card-text">Add/remove coordinators per department.</p>
+                <p class="card-text">Add/remove coordinators.</p>
             </div>
         </div>
 
@@ -188,7 +188,7 @@
             <div class="card feature-card text-center p-4 reports-card" style="cursor: pointer;">
                 <i class="bi bi-bar-chart display-5 feature-icon"></i>
                 <h5 class="card-title mt-3">Reports</h5>
-                <p class="card-text">Generate claim and verification reports.</p>
+                <p class="card-text">Approved Claims Report.</p>
             </div>
         </div>
 
@@ -196,44 +196,23 @@
         <div id="reportsSection" class="mt-4" style="display: none;">
             <div class="card bg-dark text-light">
                 <div class="card-body">
-                    <h4 class="mb-4 text-info">Reports</h4>
+                    <h4 class="mb-4 text-info">Approved Claims</h4>
                     <div class="table-responsive">
                         <table class="table table-dark table-hover align-middle">
                             <thead>
                                 <tr>
-                                    <th>Report ID</th>
                                     <th>Claim ID</th>
-                                    <th>Submitted By</th>
+                                    <th>Lecturer</th>
                                     <th>Hours Worked</th>
+                                    <th>Total</th>
                                     <th>Status</th>
-                                    <th>Date</th>
+                                    <th>Date Submitted</th>
+
                                 </tr>
                             </thead>
-                            <tbody>
-                                <!-- Sample Data (unchanged) -->
+                            <tbody id="managerReportsTbody">
                                 <tr>
-                                    <td>RPT001</td>
-                                    <td>CLM001</td>
-                                    <td>Kopano Leshope</td>
-                                    <td>20</td>
-                                    <td><span class="badge bg-success">Verified</span></td>
-                                    <td>2025-09-01</td>
-                                </tr>
-                                <tr>
-                                    <td>RPT002</td>
-                                    <td>CLM002</td>
-                                    <td>Keoagile Mafora</td>
-                                    <td>15</td>
-                                    <td><span class="badge bg-warning">Pending</span></td>
-                                    <td>2025-09-03</td>
-                                </tr>
-                                <tr>
-                                    <td>RPT003</td>
-                                    <td>CLM003</td>
-                                    <td>Andiswa Dube</td>
-                                    <td>22</td>
-                                    <td><span class="badge bg-danger">Rejected</span></td>
-                                    <td>2025-09-05</td>
+                                    <td colspan="6" class="text-center text-muted">Loading...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -279,7 +258,83 @@
         </div>
     </div>
 </div>
+<script>
+        document.addEventListener('DOMContentLoaded', function () {
+        const reportsCard = document.querySelector('.reports-card');
+        const reportsSection = document.getElementById('reportsSection');
+        const closeReportsBtn = document.getElementById('closeReports');
+        const reportsTbody = document.getElementById('managerReportsTbody');
 
+        async function loadManagerReports() {
+            if (!reportsTbody) return;
+
+            reportsTbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">Loading...</td></tr>';
+
+            try {
+                const res = await fetch('/Manager/GetApprovedClaims', { method: 'GET', credentials: 'same-origin' });
+                if (!res.ok) throw new Error('Failed to fetch claims');
+
+                const payload = await res.json();
+
+                if (!payload.success) {
+                    reportsTbody.innerHTML = '<tr><td colspan="6" class="text-center text-danger">Failed to load claims</td></tr>';
+                    return;
+                }
+
+                const claims = payload.data || [];
+
+                if (claims.length === 0) {
+                    reportsTbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No approved claims found.</td></tr>';
+                    return;
+                }
+
+                let html = '';
+                claims.forEach(c => {
+                    html += `<tr>
+                    <td>${c.claimID}</td>
+                    <td>${c.employee?.name || ''}</td>
+                    <td>${c.hoursWorked}</td>
+                    <td>${c.totalAmount.toLocaleString('en-ZA', { style: 'currency', currency: 'ZAR' })}</td>
+                    <td>${c.status}</td>
+                    <td>${c.dateCreated ? new Date(c.dateCreated).toLocaleDateString() : '-'}</td>
+                </tr>`;
+                });
+
+                reportsTbody.innerHTML = html;
+
+            } catch (err) {
+                console.error(err);
+                reportsTbody.innerHTML = '<tr><td colspan="6" class="text-center text-danger">Error loading claims</td></tr>';
+            }
+        }
+
+
+        if (reportsCard && reportsSection) {
+            reportsCard.addEventListener('click', function () {
+                reportsSection.style.display = 'block';
+                loadManagerReports();
+                reportsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        }
+
+        if (closeReportsBtn && reportsSection) {
+            closeReportsBtn.addEventListener('click', function () {
+                reportsSection.style.display = 'none';
+                reportsCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            });
+        }
+
+        // Simple HTML escape function
+        function escapeHtml(text) {
+            return text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+    });
+</script>
 <script src="~/js/manager.js"></script>
 
 

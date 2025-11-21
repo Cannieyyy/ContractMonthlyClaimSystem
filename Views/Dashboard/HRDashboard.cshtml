@@ -8,71 +8,7 @@
 }
 
 <style>
-    .modal-content {
-        transform: translateY(-20px);
-        transition: transform 0.2s ease, opacity 0.2s ease;
-    }
-
-    .modal.show .modal-content {
-        transform: translateY(0);
-        opacity: 1;
-    }
-
-    .toast-card {
-        display: flex;
-        align-items: center;
-        padding: 0.75rem 1rem;
-        min-width: 250px;
-        max-width: 350px;
-        border-radius: 0.5rem;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-        color: #fff;
-        font-size: 0.95rem;
-        opacity: 0;
-        transform: translateX(100%);
-        transition: all 0.4s ease;
-    }
-
-        .toast-card.show {
-            opacity: 1;
-            transform: translateX(0);
-        }
-
-        .toast-card i {
-            margin-right: 0.75rem;
-            font-size: 1.25rem;
-        }
-
-        .toast-card.info {
-            background-color: #0dcaf0;
-            color: #000;
-        }
-        /* info/teal */
-        .toast-card.success {
-            background-color: #198754;
-        }
-        /* success/green */
-        .toast-card.warning {
-            background-color: #ffc107;
-            color: #000;
-        }
-        /* warning/yellow */
-        .toast-card.danger {
-            background-color: #dc3545;
-        }
-        /* danger/red */
-
-        .toast-card .toast-message {
-            flex: 1;
-        }
-
-        .toast-card .toast-close {
-            background: transparent;
-            border: none;
-            color: inherit;
-            font-size: 1rem;
-            cursor: pointer;
-        }
+    
 
 </style>
 
@@ -411,11 +347,6 @@
    
 
 </div>
-
-
-
- 
-
 
 
 <!-- Invoice Modal -->

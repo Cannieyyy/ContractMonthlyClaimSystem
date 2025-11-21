@@ -287,13 +287,13 @@ namespace ContractMonthlyClaimSystem.Controllers
             var employee = await _db.Employees.AsNoTracking().FirstOrDefaultAsync(e => e.EmployeeID == empId.Value);
             if (employee == null) return RedirectToAction("Login_Register", "Home");
 
-            // Important: include SupportingDocuments
             var claims = await _db.Claims
-                .Where(c => c.EmployeeID == empId.Value)
-                .Include(c => c.SupportingDocuments)    // <--- this ensures docs appear
-                .OrderByDescending(c => c.DateCreated)
-                .AsNoTracking()
-                .ToListAsync();
+    .Include(c => c.Employee) // needed for department
+    .Include(c => c.SupportingDocuments)
+    .Where(c => c.Employee.DepartmentID == employee.DepartmentID)
+    .OrderByDescending(c => c.DateCreated)
+    .AsNoTracking()
+    .ToListAsync();
 
             var vm = new CoordinatorDashboardViewModel
             {
@@ -320,11 +320,13 @@ namespace ContractMonthlyClaimSystem.Controllers
 
             // Important: include SupportingDocuments
             var claims = await _db.Claims
-                .Where(c => c.EmployeeID == empId.Value)
-                .Include(c => c.SupportingDocuments)    // <--- this ensures docs appear
-                .OrderByDescending(c => c.DateCreated)
-                .AsNoTracking()
-                .ToListAsync();
+    .Include(c => c.Employee) // needed for DepartmentID
+    .Include(c => c.SupportingDocuments)
+    .Where(c => c.Employee.DepartmentID == employee.DepartmentID)
+    .OrderByDescending(c => c.DateCreated)
+    .AsNoTracking()
+    .ToListAsync();
+
 
             var vm = new CoordinatorDashboardViewModel
             {

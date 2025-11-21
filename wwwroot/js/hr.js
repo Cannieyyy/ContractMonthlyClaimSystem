@@ -536,43 +536,7 @@ async function confirmChange(message, type = 'info') {
     });
 }
 
-function showToast(message, type = 'info', duration = 3000) {
-    const toast = document.createElement('div');
-    toast.className = `toast-card ${type}`;
 
-    // Icon based on type
-    let icon = '';
-    switch (type) {
-        case 'success': icon = 'bi-check-circle-fill'; break;
-        case 'warning': icon = 'bi-exclamation-triangle-fill'; break;
-        case 'danger': icon = 'bi-x-circle-fill'; break;
-        default: icon = 'bi-info-circle-fill';
-    }
-
-    toast.innerHTML = `
-        <i class="bi ${icon}"></i>
-        <div class="toast-message">${message}</div>
-        <button class="toast-close">&times;</button>
-    `;
-
-    const container = document.getElementById('toastContainer');
-    container.appendChild(toast);
-
-    // Animate in
-    setTimeout(() => toast.classList.add('show'), 50);
-
-    // Close button
-    toast.querySelector('.toast-close').addEventListener('click', () => {
-        toast.classList.remove('show');
-        setTimeout(() => toast.remove(), 300);
-    });
-
-    // Auto remove after duration
-    setTimeout(() => {
-        toast.classList.remove('show');
-        setTimeout(() => toast.remove(), 300);
-    }, duration);
-}
 
 
 

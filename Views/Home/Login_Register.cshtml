@@ -3,12 +3,49 @@
     ViewData["Title"] = "Login / Register";
 }
 
+<style>
+    .my-toast {
+        opacity: 0.95;
+        border-radius: 10px;
+        padding: 0.5rem 1rem;
+        min-width: 280px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+        backdrop-filter: blur(4px);
+        color: white;
+        font-weight: 500;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        animation: fadeIn 0.3s ease;
+    }
+
+    .bg-toast-success {
+        background-color: #198754;
+    }
+    /* green */
+    .bg-toast-error {
+        background-color: #dc3545;
+    }
+    /* red */
+    .bg-toast-info {
+        background-color: #0d6efd;
+    }
+    /* blue */
+
+    
+</style>
+
+
 <div class="hero-section  text-center">
     <h1 class="display-3 fw-bold">Time2Pay Portal</h1>
     <p class="lead text-light">Login or Register to manage your monthly claims efficiently.</p>
 </div>
 
+
+
+
 <div class="container my-5">
+   
     <div class="row justify-content-center">
         <div class="col-md-6">
             <div class="auth-card">
@@ -56,11 +93,13 @@
 
                     <!-- Register Form -->
                     <div class="tab-pane fade" id="register" role="tabpanel" aria-labelledby="register-tab">
+                        
+
                         @* Use asp-action to post to HomeController.Register *@
                         <form asp-action="Register" asp-controller="Home" method="post" novalidate>
                             @Html.AntiForgeryToken()
                             <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-
+                            
                             <div class="form-floating mb-3">
                                 <input asp-for="Name" class="form-control" id="employeeName" placeholder="Full Name" />
                                 <label for="employeeName">Full Name</label>
@@ -133,10 +172,17 @@
     </div>
 </div>
 
+<div id="registerToastContainer" style="position: fixed; top: 50px; right: 50px; z-index: 1100;"></div>
+
+
+
 @section Scripts {
     @* jquery-validation unobtrusive scripts *@
     <partial name="_ValidationScriptsPartial" />
     <script>
+
+
+
         sendOtpBtn.addEventListener('click', async function () {
             const email = document.getElementById('employeeEmail').value;
             const departmentSelect = document.getElementById('employeeDepartment');
@@ -189,7 +235,59 @@
                 sendOtpBtn.textContent = 'Send OTP to Manager';
             }
         });
+                function showRegisterToast(type, message) {
+            const container = document.getElementById('registerToastContainer');
+            if (!container) return;
+
+            const bgClass = type === "success" ? "bg-success text-white" :
+                            type === "error" ? "bg-danger text-white" :
+                            "bg-secondary text-white";
+
+            const toast = document.createElement('div');
+            toast.className = `p-3 rounded ${bgClass}`;
+            toast.style.minWidth = "250px";
+            toast.style.boxShadow = "0 4px 12px rgba(0,0,0,0.25)";
+            toast.style.opacity = "0.95";
+            toast.innerHTML = `
+                <span>${message}</span>
+                <button type="button" style="background:none;border:none;color:white;font-weight:bold;cursor:pointer;float:right;">&times;</button>
+            `;
+
+            // Close button
+            toast.querySelector('button').addEventListener('click', () => toast.remove());
+
+            container.appendChild(toast);
+
+            // Auto-remove
+            setTimeout(() => toast.remove(), 3500);
+        }
+
+        // DOM ready
+        document.addEventListener("DOMContentLoaded", function() {
+            // Only trigger if TempData exists
+            @if (TempData["RegisterSuccess"] != null)
+            {
+                    <text>
+                        showRegisterToast('success', '@TempData["RegisterSuccess"]');
+                    </text>
+            }
+
+            @if (TempData["RegisterError"] != null)
+            {
+                    <text>
+                        showRegisterToast('error', '@TempData["RegisterError"]');
+                    </text>
+            }
+        });
 
     </script>
-    
+
+
 }
+
+
+
+
+
+
+

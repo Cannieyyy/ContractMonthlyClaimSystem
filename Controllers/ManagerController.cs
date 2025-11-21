@@ -159,5 +159,35 @@ namespace ContractMonthlyClaimSystem.Controllers
             }
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetApprovedClaims()
+        {
+            var empId = HttpContext.Session.GetInt32("EmployeeID");
+            if (empId == null) return Json(new { success = false, message = "Not authenticated." });
+
+            var manager = await _db.Employees
+                .Include(e => e.Department)
+                .FirstOrDefaultAsync(e => e.EmployeeID == empId.Value);
+
+            if (manager == null) return Json(new { success = false, message = "User not found." });
+
+            var claims = await _db.Claims
+                .Include(c => c.Employee)
+                .Where(c => c.Employee.DepartmentID == manager.DepartmentID && c.Status.ToLower() == "approved")
+                .OrderByDescending(c => c.DateCreated)
+                .Select(c => new {
+                    c.ClaimID,
+                    Employee = new { c.Employee.Name },
+                    c.HoursWorked,
+                    c.TotalAmount,
+                    c.DateCreated,
+                    c.Status
+                })
+                .ToListAsync();
+
+            return Json(new { success = true, data = claims });
+        }
+
+
     }
 }

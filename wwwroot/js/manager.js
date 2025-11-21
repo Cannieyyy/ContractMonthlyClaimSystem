@@ -282,3 +282,86 @@ document.addEventListener('DOMContentLoaded', function () {
 
     console.log(loadClaimsDebug());
 });
+
+
+document.addEventListener('DOMContentLoaded', function () {
+    const reportsCard = document.querySelector('.reports-card');
+    const reportsSection = document.getElementById('reportsSection');
+    const closeReportsBtn = document.getElementById('closeReports');
+    const reportsTbody = document.getElementById('managerReportsTbody');
+
+    async function loadManagerReports() {
+        if (!reportsTbody) return;
+
+        reportsTbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">Loading...</td></tr>';
+
+        try {
+            const res = await fetch('/Manager/GetApprovedClaims', { method: 'GET', credentials: 'same-origin' });
+            if (!res.ok) throw new Error('Failed to fetch claims');
+
+            const payload = await res.json();
+            if (!payload.success) {
+                reportsTbody.innerHTML = '<tr><td colspan="6" class="text-center text-danger">Failed to load claims</td></tr>';
+                return;
+            }
+
+            const claims = payload.data || [];
+            if (claims.length === 0) {
+                reportsTbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No approved claims found.</td></tr>';
+                return;
+            }
+
+            let html = '';
+            for (const c of claims) {
+                const claimId = c.ClaimID ?? '';
+                const submittedBy = c.Employee?.Name ?? '';
+                const hoursWorked = c.HoursWorked ?? '';
+                const total = c.Total ?? '';
+                const dateSubmitted = c.DateCreated ? new Date(c.DateCreated).toLocaleDateString() : '';
+                const status = c.Status ?? '';
+
+                html += `<tr>
+                        <td>${escapeHtml(claimId)}</td>
+                        <td>${escapeHtml(submittedBy)}</td>
+                        <td>${escapeHtml(String(hoursWorked))}</td>
+                        <td>${escapeHtml(String(total))}</td>
+                        <td>${escapeHtml(dateSubmitted)}</td>
+                        <td><span class="badge bg-success">${escapeHtml(status)}</span></td>
+                    </tr>`;
+            }
+
+            reportsTbody.innerHTML = html;
+
+        } catch (err) {
+            console.error(err);
+            reportsTbody.innerHTML = '<tr><td colspan="6" class="text-center text-danger">Error loading claims</td></tr>';
+        }
+    }
+
+    if (reportsCard && reportsSection) {
+        reportsCard.addEventListener('click', function () {
+            reportsSection.style.display = 'block';
+            loadManagerReports();
+            reportsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+    }
+
+    if (closeReportsBtn && reportsSection) {
+        closeReportsBtn.addEventListener('click', function () {
+            reportsSection.style.display = 'none';
+            reportsCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
+    }
+
+    // Simple HTML escape function
+    function escapeHtml(text) {
+        return text
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+});
+
+

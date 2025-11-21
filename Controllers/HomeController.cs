@@ -48,8 +48,10 @@ namespace ContractMonthlyClaimSystem.Controllers
         public async Task<IActionResult> Login_Register()
         {
             ViewBag.Departments = await _db.Departments.ToListAsync();
-            return View();
+
+            return View(new RegisterViewModel());
         }
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]

@@ -188,16 +188,23 @@ namespace ContractMonthlyClaimSystem.Controllers
             if (claim == null)
                 return Json(new { success = false, message = "Claim not found." });
 
+
+
             if (claim.Employee.DepartmentID != user.DepartmentID)
                 return Json(new { success = false, message = "You cannot act on claims outside your department." });
 
-            if (claim.Status.Equals("verified", StringComparison.OrdinalIgnoreCase))
+            string status = claim.Status?.Trim().ToLower() ?? "";
+
+            //BLOCK rejecting verified claims
+            if (status.Equals("verified"))
                 return Json(new { success = false, message = "Verified claims cannot be rejected." });
 
-            if (claim.Status.Equals("Approved", StringComparison.OrdinalIgnoreCase))
+            
+            if (status == "approved")
                 return Json(new { success = false, message = "Approved claims cannot be rejected." });
 
-            if (claim.Status.Equals("Deleted", StringComparison.OrdinalIgnoreCase))
+            //BLOCK rejecting deleted claims
+            if (status == "deleted")
                 return Json(new { success = false, message = "Deleted claims cannot be rejected." });
 
             // PASS — reject the claim
@@ -219,6 +226,7 @@ namespace ContractMonthlyClaimSystem.Controllers
 
             return Json(new { success = true, message = "Claim rejected." });
         }
+
 
 
         // Small helper: redirect to the application's download endpoint

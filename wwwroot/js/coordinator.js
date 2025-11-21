@@ -74,10 +74,13 @@
 
                     const isDeleted = String(status).toLowerCase() === 'deleted';
                     const isApproved = String(status).toLowerCase() === 'approved';
-                    const verifyDisabledAttr = (isDeleted || isApproved) ? 'disabled' : '';
-                    const VerifyBtn = `<button class="btn btn-success btn-sm me-1 action-Verify" data-claim-id="${escapeHtml(String(claimId))}" ${verifyDisabledAttr}>Verify</button>`;
+                    const isVerified = String(status).toLowerCase() === 'verified';
 
-                    const rejectBtn = `<button class="btn btn-danger btn-sm action-reject" data-claim-id="${escapeHtml(String(claimId))}" ${isDeleted ? 'disabled' : ''}>Reject</button>`;
+                    const verifyDisabled = isDeleted || isApproved || isVerified ? 'disabled' : '';
+                    const rejectDisabled = isDeleted || isApproved || isVerified ? 'disabled' : '';
+
+                    const verifyBtn = `<button class="btn btn-success btn-sm me-1 action-Verify" data-claim-id="${claimId}" ${verifyDisabled}>Verify</button>`;
+                    const rejectBtn = `<button class="btn btn-danger btn-sm action-reject" data-claim-id="${claimId}" ${rejectDisabled}>Reject</button>`;
 
                     html += `<tr>
                         <td>${escapeHtml(String(claimId))}</td>
@@ -87,7 +90,7 @@
                         
                         <td>${docCell}</td>
                         <td><span class="badge ${badgeClass(status)}">${escapeHtml(String(status))}</span></td>
-                        <td>${VerifyBtn}${rejectBtn}</td>
+                        <td>${verifyBtn}${rejectBtn}</td>
                     </tr>`;
                 }
 
@@ -109,14 +112,16 @@
                             },
                             body: 'claimId=' + encodeURIComponent(id)
                         })
-                            .then(r => {
-                                if (r.ok) {
-                                    alert('Claim Verified');
+                            .then(r => r.json())
+                            .then(response => {
+                                if (response.success) {
+                                    alert(response.message || 'Claim verified');
                                     loadClaims();
                                 } else {
-                                    alert('Failed to Verify claim');
+                                    alert('❌ ' + (response.message || 'Failed to verify claim'));
                                 }
                             })
+
                             .catch(e => {
                                 console.error(e);
                                 alert('Error approving claim');
@@ -141,12 +146,14 @@
                             },
                             body: 'claimId=' + encodeURIComponent(id) + '&comment=' + encodeURIComponent(comment)
                         })
-                            .then(r => {
-                                if (r.ok) {
-                                    alert('Claim rejected');
+                            .then(r => r.json())
+                            .then(response => {
+                                // Show whatever message the server sent
+                                alert(response.message || 'No message from server');
+
+                                // Only reload table if it was actually successful
+                                if (response.success) {
                                     loadClaims();
-                                } else {
-                                    alert('Failed to reject claim');
                                 }
                             })
                             .catch(e => {
@@ -155,6 +162,8 @@
                             });
                     });
                 });
+
+
 
             } catch (err) {
                 console.error(err);
@@ -289,4 +298,78 @@ document.addEventListener('DOMContentLoaded', function () {
             new bootstrap.Tooltip(el);
         }
     });
+});
+
+
+
+document.addEventListener('DOMContentLoaded', function () {
+    const reportsCard = document.querySelector('.reports-card');
+    const reportsSection = document.getElementById('reportsSection');
+    const tbody = document.querySelector('#approvedClaimsTable tbody');
+
+    async function loadApprovedClaims() {
+        if (!tbody) return;
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">Loading...</td></tr>';
+
+        try {
+            const res = await fetch('/Coordinator/GetClaimsForVerification', {
+                method: 'GET',
+                credentials: 'same-origin'
+            });
+
+            if (!res.ok) throw new Error('Failed to fetch claims');
+
+            const data = await res.json();
+            if (!data.success || !Array.isArray(data.data)) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center text-danger">Failed to load claims.</td></tr>';
+                return;
+            }
+
+            // Filter approved claims
+            const approvedClaims = data.data.filter(c => String(c.Status).toLowerCase() === 'approved');
+            if (approvedClaims.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">No approved claims found.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = '';
+            approvedClaims.forEach(c => {
+                const claimId = c.ClaimID ?? c.claimID ?? '';
+                const employeeName = c.EmployeeName ?? c.employeeName ?? (c.employee && (c.employee.Name || c.employee.name)) ?? '';
+                const claimDate = c.ClaimDate ?? c.claimDate ?? '';
+                const hoursWorked = c.HoursWorked ?? c.hoursWorked ?? '';
+                const total = hoursWorked; // Assuming Total = HoursWorked; adjust if different
+                const documentId = c.DocumentID ?? c.documentID ?? null;
+                const documentName = c.DocumentName ?? c.documentName ?? '';
+
+                const docCell = documentId
+                    ? `<a href="/Dashboard/DownloadDocument/${encodeURIComponent(documentId)}" target="_blank" class="btn btn-sm btn-outline-info">View</a><div class="small text-muted mt-1">${documentName}</div>`
+                    : '<span class="text-muted">No doc</span>';
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${claimId}</td>
+                        <td>${employeeName}</td>
+                        <td>${hoursWorked}</td>
+                        <td>${claimDate}</td>
+                        <td>${total}</td>
+                        <td><span class="badge bg-success">Approved</span></td>
+                        <td>${docCell}</td>
+                    </tr>
+                `;
+            });
+
+        } catch (err) {
+            console.error(err);
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center text-danger">Error loading approved claims</td></tr>';
+        }
+    }
+
+    if (reportsCard && reportsSection) {
+        reportsCard.addEventListener('click', function () {
+            reportsSection.style.display = 'block';
+            loadApprovedClaims();
+            reportsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+    }
 });

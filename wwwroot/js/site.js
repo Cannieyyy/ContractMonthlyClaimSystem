@@ -84,6 +84,14 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+    document.addEventListener("DOMContentLoaded", function () {
+        const toastElList = [].slice.call(document.querySelectorAll('.toast'));
+        toastElList.map(function (toastEl) {
+            const t = new bootstrap.Toast(toastEl, { delay: 3500 });
+            t.show();
+        });
+    });
+
     // cancel button hides form
     cancelBtn.addEventListener('click', function () {
         claimFormSection.style.display = 'none';
@@ -260,176 +268,48 @@ document.getElementById('currentDate').textContent = formattedDate;
                 if (editModal) editModal.show();
             });
                 });
-            })();
+})();
+
+function showToast(message, type = 'info', duration = 3000) {
+    const toast = document.createElement('div');
+    toast.className = `toast-card ${type}`;
+
+    // Icon based on type
+    let icon = '';
+    switch (type) {
+        case 'success': icon = 'bi-check-circle-fill'; break;
+        case 'warning': icon = 'bi-exclamation-triangle-fill'; break;
+        case 'danger': icon = 'bi-x-circle-fill'; break;
+        default: icon = 'bi-info-circle-fill';
+    }
+
+    toast.innerHTML = `
+        <i class="bi ${icon}"></i>
+        <div class="toast-message">${message}</div>
+        <button class="toast-close">&times;</button>
+    `;
+
+    const container = document.getElementById('toastContainer');
+    container.appendChild(toast);
+
+    // Animate in
+    setTimeout(() => toast.classList.add('show'), 50);
+
+    // Close button
+    toast.querySelector('.toast-close').addEventListener('click', () => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    });
+
+    // Auto remove after duration
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, duration);
+}
     
 
 
 
-// wwwroot/js/coordinator.js
-document.addEventListener('DOMContentLoaded', function () {
-    const verifyCard = document.querySelector('.verify-claims-card');
-    const verifySection = document.getElementById('verifyClaimsSection');
-    const closeBtn = document.getElementById('closeVerifyClaims');
-    const tbody = verifySection ? verifySection.querySelector('tbody') : null;
 
-    async function loadClaims() {
-        if (!tbody) return;
-
-        tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted">Loading...</td></tr>';
-
-        try {
-            const res = await fetch('/Coordinator/GetClaimsForVerification', { method: 'GET', credentials: 'same-origin' });
-            if (!res.ok) throw new Error('Failed to fetch claims: ' + res.status);
-
-            const payload = await res.json();
-            if (!payload.success) {
-                tbody.innerHTML = '<tr><td colspan="8" class="text-center text-danger">Failed to load claims</td></tr>';
-                return;
-            }
-
-            const claims = payload.data;
-            if (!claims || claims.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" class="text-muted">No claims found for your department.</td></tr>';
-                return;
-            }
-
-            // Build rows
-            let html = '';
-            for (let i = 0; i < claims.length; i++) {
-                const c = claims[i];
-
-                // document link cell (uses camelCase JSON)
-                const docCell = c.documentID
-                    ? `<a href="/Dashboard/DownloadDocument/${c.documentID}" target="_blank" class="btn btn-sm btn-outline-info">View</a><div class="small text-muted mt-1">${escapeHtml(c.documentName || '')}</div>`
-                    : '<span class="text-muted">No doc</span>';
-
-                const isDeleted = (c.status && c.status.toLowerCase() === 'deleted');
-                const VerifyBtn = `<button class="btn btn-success btn-sm me-1 action-Verify" data-claim-id="${c.claimID}" ${isDeleted ? 'disabled' : ''}>Verify</button>`;
-                const rejectBtn = `<button class="btn btn-danger btn-sm action-reject" data-claim-id="${c.claimID}" ${isDeleted ? 'disabled' : ''}>Reject</button>`;
-
-                html += `<tr>
-                    <td>${c.claimID}</td>
-                    <td>${escapeHtml(c.employeeName)}</td>
-                    <td>${escapeHtml(c.claimDate)}</td>
-                    <td>${escapeHtml(c.hoursWorked)}</td>
-                    <td>${formatCurrency(c.totalAmount)}</td>
-                    <td>${docCell}</td>
-                    <td><span class="badge ${badgeClass(c.status)}">${escapeHtml(c.status)}</span></td>
-                    <td>${VerifyBtn}${rejectBtn}</td>
-                </tr>`;
-            }
-
-            tbody.innerHTML = html;
-
-            attachActionHandlers();
-
-        } catch (err) {
-            console.error(err);
-            tbody.innerHTML = '<tr><td colspan="8" class="text-center text-danger">Error loading claims</td></tr>';
-        }
-    }
-
-    function attachActionHandlers() {
-        document.querySelectorAll('.action-Verify').forEach(btn => {
-            btn.removeEventListener('click', VerifyClick); // safe remove
-            btn.addEventListener('click', VerifyClick);
-        });
-
-        document.querySelectorAll('.action-reject').forEach(btn => {
-            btn.removeEventListener('click', rejectClick);
-            btn.addEventListener('click', rejectClick);
-        });
-    }
-
-    function VerifyClick() {
-        const id = this.getAttribute('data-claim-id');
-        if (!confirm('Verify claim #' + id + '?')) return;
-
-        fetch('/Coordinator/VerifyClaim', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'RequestVerificationToken': getAntiForgeryToken()
-            },
-            body: 'claimId=' + encodeURIComponent(id)
-        }).then(r => {
-            if (r.ok) {
-                alert('Claim Verified');
-                loadClaims();
-            } else {
-                r.text().then(t => alert('Failed to Verify claim: ' + t));
-            }
-        }).catch(e => { console.error(e); alert('Error approving claim'); });
-    }
-
-    function rejectClick() {
-        const id = this.getAttribute('data-claim-id');
-        const comment = prompt('Optional comment for rejection (leave empty for none):');
-        if (comment === null) return;
-
-        fetch('/Coordinator/RejectClaim', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'RequestVerificationToken': getAntiForgeryToken()
-            },
-            body: 'claimId=' + encodeURIComponent(id) + '&comment=' + encodeURIComponent(comment || '')
-        }).then(r => {
-            if (r.ok) {
-                alert('Claim rejected');
-                loadClaims();
-            } else {
-                r.text().then(t => alert('Failed to reject claim: ' + t));
-            }
-        }).catch(e => { console.error(e); alert('Error rejecting claim'); });
-    }
-
-    // helpers
-    function escapeHtml(s) {
-        if (!s) return '';
-        return s.replace(/[&<>"]/g, function (c) {
-            return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];
-        });
-    }
-    function formatCurrency(n) {
-        if (n == null) return '';
-        return new Intl.NumberFormat('en-ZA', { style: 'currency', currency: 'ZAR' }).format(n);
-    }
-    function badgeClass(status) {
-        if (!status) return 'bg-secondary';
-        const s = status.toLowerCase();
-        if (s === 'pending') return 'bg-warning';
-        if (s === 'Verified' || s === 'verified') return 'bg-success';
-        if (s === 'rejected') return 'bg-danger';
-        if (s === 'deleted') return 'bg-secondary';
-        return 'bg-secondary';
-    }
-    function getAntiForgeryToken() {
-        var tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
-        return tokenInput ? tokenInput.value : '';
-    }
-
-    // show section and load when card clicked
-    if (verifyCard && verifySection) {
-        verifyCard.addEventListener('click', function () {
-            verifySection.style.display = 'block';
-            loadClaims();
-            verifySection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        });
-    }
-
-    if (closeBtn && verifySection) {
-        closeBtn.addEventListener('click', function () {
-            verifySection.style.display = 'none';
-            verifyCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        });
-    }
-
-    // current date (keeps it here)
-    const today = new Date();
-    const options = { year: 'numeric', month: 'long', day: 'numeric' };
-    const formattedDate = today.toLocaleDateString('en-US', options);
-    const dateSpan = document.getElementById('currentDate');
-    if (dateSpan) dateSpan.textContent = formattedDate;
-});
 
