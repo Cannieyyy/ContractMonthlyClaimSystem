@@ -15,7 +15,6 @@ The system delivers a consistent and simple user experience while enforcing stro
 - Technology Stack  
 - Installation  
 
----
 
 # 📖 Overview
 
@@ -33,7 +32,7 @@ Every dashboard uses the same layout, including:
 
 This makes the platform easy to use because every page feels familiar and intuitive.
 
----
+
 
 # ⭐ Key Features
 
@@ -58,11 +57,11 @@ This makes the platform easy to use because every page feels familiar and intuit
 - Each user sees claims only from **their assigned department**  
 - HR has full system access  
 
----
+
 
 # 🧑‍🏫 User Roles & Functionalities
 
----
+
 
 ## 👨‍🏫 Lecturer Dashboard
 
@@ -82,7 +81,7 @@ This makes the platform easy to use because every page feels familiar and intuit
 ### ✔ Rejected Claim Comments
 - Button shows the reason the claim was rejected  
 
----
+
 
 ## 🧑‍💼 Coordinator Dashboard
 
@@ -99,7 +98,7 @@ This makes the platform easy to use because every page feels familiar and intuit
 - View approved claims for their department  
 - Totals automatically calculated  
 
----
+
 
 ## 👨‍💼 Manager Dashboard
 
@@ -114,7 +113,7 @@ This makes the platform easy to use because every page feels familiar and intuit
 - Full report of approved claims  
 - Automatically calculated totals  
 
----
+
 
 ## 🧑‍💼💼 HR Admin Dashboard (Top-Level Access)
 
@@ -135,7 +134,7 @@ This makes the platform easy to use because every page feels familiar and intuit
 - Change employee roles  
 - Activate or deactivate user accounts  
 
----
+
 
 # 🔧 System Improvements
 
@@ -160,7 +159,7 @@ This makes the platform easy to use because every page feels familiar and intuit
 - Added batch PDF export  
 - Added user account management panel  
 
----
+
 
 # 🤖 Automation & Validations
 
@@ -174,7 +173,7 @@ The system automatically:
 - Generates PDF invoices  
 - Calculates totals for reports  
 
----
+
 
 # 🛠 Technology Stack
 
@@ -185,7 +184,7 @@ The system automatically:
 - HTML / CSS  
 - PDF Generation Library  
 
----
+
 
 # 📦 Installation
 
