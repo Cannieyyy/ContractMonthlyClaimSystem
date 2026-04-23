@@ -4,7 +4,7 @@
 Time2Pay is a web-based claims management system designed to streamline the submission, verification, approval, and reporting of lecturer claims.  
 The system delivers a consistent and simple user experience while enforcing strong validation, automation, and role-based access control.
 
----
+
 
 # 📌 Table of Contents
 - Overview  
